@@ -6,9 +6,6 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
-import android.os.Message;
 import android.provider.MediaStore;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -19,27 +16,24 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
 import java.util.Base64;
 import java.io.ByteArrayOutputStream;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import edu.byu.cs.tweeter.R;
-import edu.byu.cs.tweeter.client.model.service.backgroundTask.RegisterTask;
-import edu.byu.cs.tweeter.client.cache.Cache;
+import edu.byu.cs.tweeter.client.presenter.RegisterPresenter;
 import edu.byu.cs.tweeter.client.view.main.MainActivity;
-import edu.byu.cs.tweeter.model.domain.AuthToken;
 import edu.byu.cs.tweeter.model.domain.User;
 
 /**
  * Implements the register screen.
  */
-public class RegisterFragment extends Fragment {
+public class RegisterFragment extends Fragment implements RegisterPresenter.View {
     private static final String LOG_TAG = "RegisterFragment";
     private static final int RESULT_IMAGE = 10;
+
+    private RegisterPresenter presenter;
 
     private EditText firstName;
     private EditText lastName;
@@ -67,6 +61,8 @@ public class RegisterFragment extends Fragment {
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_register, container, false);
 
+        presenter = new RegisterPresenter(this);
+
         firstName = view.findViewById(R.id.registerFirstName);
         lastName = view.findViewById(R.id.registerLastName);
         alias = view.findViewById(R.id.registerUsername);
@@ -88,30 +84,9 @@ public class RegisterFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 // Register and move to MainActivity.
-                try {
-                    validateRegistration();
-                    errorView.setText(null);
-                    registeringToast = Toast.makeText(getContext(), "Registering...", Toast.LENGTH_LONG);
-                    registeringToast.show();
-
-                    // Convert image to byte array.
-                    Bitmap image = ((BitmapDrawable) imageToUpload.getDrawable()).getBitmap();
-                    ByteArrayOutputStream bos = new ByteArrayOutputStream();
-                    image.compress(Bitmap.CompressFormat.JPEG, 100, bos);
-                    byte[] imageBytes = bos.toByteArray();
-
-                    // Intentionally, Use the java Base64 encoder so it is compatible with M4.
-                    String imageBytesBase64 = Base64.getEncoder().encodeToString(imageBytes);
-
-                    // Send register request.
-                    RegisterTask registerTask = new RegisterTask(firstName.getText().toString(), lastName.getText().toString(),
-                            alias.getText().toString(), password.getText().toString(), imageBytesBase64, new RegisterHandler());
-
-                    ExecutorService executor = Executors.newSingleThreadExecutor();
-                    executor.execute(registerTask);
-                } catch (Exception e) {
-                    errorView.setText(e.getMessage());
-                }
+                registeringToast = Toast.makeText(getContext(), "Registering...", Toast.LENGTH_LONG);
+                presenter.tryRegister(firstName.getText().toString(), lastName.getText().toString(),
+                        alias.getText().toString(), password.getText().toString());
             }
         });
 
@@ -130,28 +105,49 @@ public class RegisterFragment extends Fragment {
         }
     }
 
-    public void validateRegistration() {
-        if (firstName.getText().length() == 0) {
-            throw new IllegalArgumentException("First Name cannot be empty.");
-        }
-        if (lastName.getText().length() == 0) {
-            throw new IllegalArgumentException("Last Name cannot be empty.");
-        }
-        if (alias.getText().length() == 0) {
-            throw new IllegalArgumentException("Alias cannot be empty.");
-        }
-        if (alias.getText().charAt(0) != '@') {
-            throw new IllegalArgumentException("Alias must begin with @.");
-        }
-        if (alias.getText().length() < 2) {
-            throw new IllegalArgumentException("Alias must contain 1 or more characters after the @.");
-        }
-        if (password.getText().length() == 0) {
-            throw new IllegalArgumentException("Password cannot be empty.");
-        }
+    @Override
+    public void displayMessage(String message) {
+        Toast.makeText(getContext(), message, Toast.LENGTH_LONG).show();
+    }
 
+    @Override
+    public void setRegisterMessage(boolean value) {
+        if(value) {
+            registeringToast.show();
+        }
+        else {
+            registeringToast.cancel();
+        }
+    }
+
+    @Override
+    public void startUserActivity(User user) {
+        Intent intent = new Intent(getContext(), MainActivity.class);
+        intent.putExtra(MainActivity.CURRENT_USER_KEY, user);
+        startActivity(intent);
+    }
+
+    @Override
+    public void validateImage() {
         if (imageToUpload.getDrawable() == null) {
             throw new IllegalArgumentException("Profile image must be uploaded.");
         }
+    }
+
+    @Override
+    public String getEncodedImage() {
+        // Convert image to byte array.
+        Bitmap image = ((BitmapDrawable) imageToUpload.getDrawable()).getBitmap();
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        image.compress(Bitmap.CompressFormat.JPEG, 100, bos);
+        byte[] imageBytes = bos.toByteArray();
+
+        // Intentionally, Use the java Base64 encoder so it is compatible with M4.
+        return Base64.getEncoder().encodeToString(imageBytes);
+    }
+
+    @Override
+    public void setErrorView(String message) {
+        errorView.setText(message);
     }
 }

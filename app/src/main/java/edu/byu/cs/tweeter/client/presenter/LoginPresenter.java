@@ -25,16 +25,11 @@ public class LoginPresenter {
         userService = new UserService();
     }
 
-    public void login(String alias, String password) {
-        userService.login(alias, password, new LoginObserver());
-
-    }
-
     public void tryLogin(String alias, String password) {
         try {
-            validateLogin(alias, password);
+            validateLogin(alias, password); // TODO Does validation need to be pushed to service?
             view.setErrorView(null);
-            login(alias, password);
+            userService.login(alias, password, new LoginObserver());
 
         } catch (Exception e) {
             view.setErrorView(e.getMessage());

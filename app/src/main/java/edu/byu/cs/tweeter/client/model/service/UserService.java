@@ -15,17 +15,12 @@ import edu.byu.cs.tweeter.client.cache.Cache;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.GetUserTask;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.LoginTask;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.RegisterTask;
+import edu.byu.cs.tweeter.client.presenter.RegisterPresenter;
 import edu.byu.cs.tweeter.client.view.main.MainActivity;
 import edu.byu.cs.tweeter.model.domain.AuthToken;
 import edu.byu.cs.tweeter.model.domain.User;
 
 public class UserService {
-
-    public void login(String alias, String password, LoginObserver observer) {
-        LoginTask loginTask = new LoginTask(alias, password, new LoginHandler(observer));
-        ExecutorService executor = Executors.newSingleThreadExecutor();
-        executor.execute(loginTask);
-    }
 
     public interface GetUserObserver {
 
@@ -41,13 +36,31 @@ public class UserService {
         void handleSuccess(User loggedInUser);
     }
 
-    public interface RegisterObserver {}
+    public interface RegisterObserver {
+        void displayMessage(String s);
+
+        void handleSuccess(User registeredUser);
+    }
 
     public void getUser(String userAlias, GetUserObserver observer) {
         GetUserTask getUserTask = new GetUserTask(Cache.getInstance().getCurrUserAuthToken(),
                 userAlias, new GetUserHandler(observer));
         ExecutorService executor = Executors.newSingleThreadExecutor();
         executor.execute(getUserTask);
+    }
+
+    public void login(String alias, String password, LoginObserver observer) {
+        LoginTask loginTask = new LoginTask(alias, password, new LoginHandler(observer));
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+        executor.execute(loginTask);
+    }
+
+    public void register(String firstName, String lastName, String alias, String password, String imageBytesBase64, RegisterPresenter.RegisterObserver observer) {
+        RegisterTask registerTask = new RegisterTask(firstName, lastName, alias, password,
+                imageBytesBase64, new RegisterHandler(observer));
+
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+        executor.execute(registerTask);
     }
 
     /**
@@ -118,8 +131,11 @@ public class UserService {
 
     private class RegisterHandler extends Handler {
 
-        public RegisterHandler() {
+        private RegisterObserver observer;
+
+        public RegisterHandler(RegisterObserver observer) {
             super(Looper.getMainLooper());
+            this.observer = observer;
         }
 
         @Override
@@ -129,27 +145,17 @@ public class UserService {
                 User registeredUser = (User) msg.getData().getSerializable(RegisterTask.USER_KEY);
                 AuthToken authToken = (AuthToken) msg.getData().getSerializable(RegisterTask.AUTH_TOKEN_KEY);
 
-                Intent intent = new Intent(getContext(), MainActivity.class);
-
                 Cache.getInstance().setCurrUser(registeredUser);
                 Cache.getInstance().setCurrUserAuthToken(authToken);
 
-                intent.putExtra(MainActivity.CURRENT_USER_KEY, registeredUser);
+                observer.handleSuccess(registeredUser);
 
-                registeringToast.cancel();
-
-                Toast.makeText(getContext(), "Hello " + Cache.getInstance().getCurrUser().getName(), Toast.LENGTH_LONG).show();
-                try {
-                    startActivity(intent);
-                } catch (Exception e) {
-                    System.out.println(e.getMessage());
-                }
             } else if (msg.getData().containsKey(RegisterTask.MESSAGE_KEY)) {
                 String message = msg.getData().getString(RegisterTask.MESSAGE_KEY);
-                Toast.makeText(getContext(), "Failed to register: " + message, Toast.LENGTH_LONG).show();
+                observer.displayMessage("Failed to register: " + message);
             } else if (msg.getData().containsKey(RegisterTask.EXCEPTION_KEY)) {
                 Exception ex = (Exception) msg.getData().getSerializable(RegisterTask.EXCEPTION_KEY);
-                Toast.makeText(getContext(), "Failed to register because of exception: " + ex.getMessage(), Toast.LENGTH_LONG).show();
+                observer.displayMessage("Failed to register because of exception: " + ex.getMessage());
             }
         }
     }

@@ -6,8 +6,7 @@ import edu.byu.cs.tweeter.client.model.service.FollowService;
 import edu.byu.cs.tweeter.client.model.service.UserService;
 import edu.byu.cs.tweeter.model.domain.User;
 
-public class GetFollowingPresenter {
-
+public class GetFollowersPresenter {
     private static final int PAGE_SIZE = 10;
 
     public interface View {
@@ -21,15 +20,16 @@ public class GetFollowingPresenter {
         void startUserActivity(User user);
     }
 
-    private View view; // no need to have a list because it's one to one
+    private View view;
 
     private FollowService followService;
     private UserService userService;
 
     private User user;
-    private User lastFollowee;
+    private User lastFollower;
 
     private boolean hasMorePages;
+    private boolean isLoading = false;
 
     public boolean hasMorePages() {
         return hasMorePages;
@@ -47,10 +47,8 @@ public class GetFollowingPresenter {
         isLoading = loading;
     }
 
-    private boolean isLoading = false;
-
-    public GetFollowingPresenter(View view, User user) {
-        this.view = view; // one-to-one means don't need to register the usual way
+    public GetFollowersPresenter(View view, User user) {
+        this.view = view;
         this.user = user;
         this.followService = new FollowService();
         this.userService = new UserService();
@@ -60,16 +58,15 @@ public class GetFollowingPresenter {
         if (!isLoading) {   // This guard is important for avoiding a race condition in the scrolling code.
             isLoading = true;
             view.setLoadingFooter(true);
-            followService.loadMoreItems(user, PAGE_SIZE, lastFollowee, new GetFollowObserver());
+            followService.loadMoreItems(user, PAGE_SIZE, lastFollower, new GetFollowersPresenter.GetFollowersObserver());
         }
     }
 
     public void getUser(String userAlias) {
-        userService.getUser(userAlias, new GetUserObserver());
+        userService.getUser(userAlias, new GetFollowersPresenter.GetUserObserver());
     }
-
-    public class GetFollowObserver implements FollowService.GetFollowObserver {
-
+    
+    public class GetFollowersObserver implements FollowService.GetFollowObserver {
         @Override
         public void displayError(String message) {
             isLoading = false;
@@ -81,7 +78,7 @@ public class GetFollowingPresenter {
         public void displayException(Exception ex) {
             isLoading = false;
             view.setLoadingFooter(false);
-            view.displayMessage("Failed to get following because of exception: " + ex.getMessage());
+            view.displayMessage("Failed to get followers because of exception: " + ex.getMessage());
         }
 
         @Override
@@ -89,7 +86,7 @@ public class GetFollowingPresenter {
             isLoading = false;
             view.setLoadingFooter(false);
 
-            lastFollowee = (items.size() > 0) ? items.get(items.size() - 1) : null;
+            lastFollower = (items.size() > 0) ? items.get(items.size() - 1) : null;
             setHasMorePages(hasMorePages);
             view.addMoreItems(items);
         }

@@ -89,6 +89,13 @@ public class FollowingFragment extends Fragment implements GetFollowingPresenter
     }
 
     @Override
+    public void startUserActivity(User user) {
+        Intent intent = new Intent(getContext(), MainActivity.class);
+        intent.putExtra(MainActivity.CURRENT_USER_KEY, user);
+        startActivity(intent);
+    }
+
+    @Override
     public void addMoreItems(List<User> followees) {
         followingRecyclerViewAdapter.addItems(followees);
     }
@@ -101,13 +108,6 @@ public class FollowingFragment extends Fragment implements GetFollowingPresenter
         else {
             followingRecyclerViewAdapter.removeLoadingFooter();
         }
-    }
-
-    @Override
-    public void startUserActivity(User user) {
-        Intent intent = new Intent(getContext(), MainActivity.class);
-        intent.putExtra(MainActivity.CURRENT_USER_KEY, user);
-        startActivity(intent);
     }
 
     /**
@@ -133,7 +133,7 @@ public class FollowingFragment extends Fragment implements GetFollowingPresenter
 
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
-                public void onClick(View view) { // TODO move this; getFollowingPresenter, UserService
+                public void onClick(View view) {
                     presenter.getUser(userAlias.getText().toString());
                     Toast.makeText(getContext(), "Getting user's profile...", Toast.LENGTH_LONG).show();
                 }

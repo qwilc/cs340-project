@@ -2,11 +2,12 @@ package edu.byu.cs.tweeter.client.presenter;
 
 import java.util.List;
 
-import edu.byu.cs.tweeter.client.model.service.FollowService;
+import edu.byu.cs.tweeter.client.model.service.StatusService;
 import edu.byu.cs.tweeter.client.model.service.UserService;
+import edu.byu.cs.tweeter.model.domain.Status;
 import edu.byu.cs.tweeter.model.domain.User;
 
-public class GetFollowingPresenter {
+public class FeedPresenter {
 
     private static final int PAGE_SIZE = 10;
 
@@ -14,20 +15,20 @@ public class GetFollowingPresenter {
 
         void displayMessage(String message);
 
-        void addMoreItems(List<User> followees);
-
         void setLoadingFooter(boolean value);
+
+        void addMoreItems(List<Status> statuses);
 
         void startUserActivity(User user);
     }
 
-    private View view; // no need to have a list because it's one to one
+    private View view;
 
-    private FollowService followService;
     private UserService userService;
+    private StatusService statusService;
 
     private User user;
-    private User lastFollowee;
+    private Status lastStatus;
 
     private boolean hasMorePages;
     private boolean isLoading = false;
@@ -48,49 +49,45 @@ public class GetFollowingPresenter {
         isLoading = loading;
     }
 
-    public GetFollowingPresenter(View view, User user) {
-        this.view = view; // one-to-one means don't need to register the usual way
+    public FeedPresenter(View view, User user) {
+        this.view = view;
         this.user = user;
-        this.followService = new FollowService();
+        this.statusService = new StatusService();
         this.userService = new UserService();
+    }
+
+    public void getUser(String alias) {
+        userService.getUser(alias, new GetUserObserver());
     }
 
     public void loadMoreItems() {
         if (!isLoading) {   // This guard is important for avoiding a race condition in the scrolling code.
             isLoading = true;
             view.setLoadingFooter(true);
-            followService.loadMoreItems(user, PAGE_SIZE, lastFollowee, new GetFollowingObserver());
+
+            statusService.loadMoreItems(user, PAGE_SIZE, lastStatus, new GetFeedObserver());
+
+
         }
     }
 
-    public void getUser(String userAlias) {
-        userService.getUser(userAlias, new GetUserObserver());
-    }
-
-    public class GetFollowingObserver implements FollowService.GetFollowingObserver {
+    public class GetFeedObserver implements StatusService.GetFeedObserver {
 
         @Override
-        public void displayError(String message) {
+        public void displayMessage(String message) {
             isLoading = false;
             view.setLoadingFooter(false);
             view.displayMessage(message);
         }
 
         @Override
-        public void displayException(Exception ex) {
-            isLoading = false;
-            view.setLoadingFooter(false);
-            view.displayMessage("Failed to get following because of exception: " + ex.getMessage());
-        }
-
-        @Override
-        public void addFollowees(List<User> followees, boolean hasMorePages) {
+        public void addItems(List<Status> statuses, boolean hasMorePages) {
             isLoading = false;
             view.setLoadingFooter(false);
 
-            lastFollowee = (followees.size() > 0) ? followees.get(followees.size() - 1) : null;
+            lastStatus = (statuses.size() > 0) ? statuses.get(statuses.size() - 1) : null;
             setHasMorePages(hasMorePages);
-            view.addMoreItems(followees);
+            view.addMoreItems(statuses);
         }
     }
 

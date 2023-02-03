@@ -1,47 +1,105 @@
 package edu.byu.cs.tweeter.client.presenter;
 
-import android.os.Handler;
-import android.os.Looper;
-import android.os.Message;
-import android.widget.Toast;
-
-import androidx.annotation.NonNull;
-
 import java.util.List;
 
-import edu.byu.cs.tweeter.client.model.service.backgroundTask.GetStoryTask;
+import edu.byu.cs.tweeter.client.model.service.StatusService;
+import edu.byu.cs.tweeter.client.model.service.UserService;
 import edu.byu.cs.tweeter.model.domain.Status;
+import edu.byu.cs.tweeter.model.domain.User;
 
 public class GetStoryPresenter {
-    /**
-     * Message handler (i.e., observer) for GetStoryTask.
-     */
-    private class GetStoryHandler extends Handler {
 
-        public GetStoryHandler() {
-            super(Looper.getMainLooper());
+    private static final int PAGE_SIZE = 10;
+
+    public void getUser(String alias) {
+        userService.getUser(alias, new GetStoryPresenter.GetUserObserver());
+    }
+
+    public interface View {
+
+        void displayMessage(String message);
+
+        void setLoadingFooter(boolean value);
+
+        void addMoreItems(List<Status> statuses);
+
+        void startUserActivity(User user);
+    }
+
+    private View view;
+
+    private UserService userService;
+    private StatusService statusService;
+
+    private User user;
+    private Status lastStatus;
+
+    private boolean hasMorePages;
+    private boolean isLoading = false;
+
+    public boolean hasMorePages() {
+        return hasMorePages;
+    }
+
+    public void setHasMorePages(boolean hasMorePages) {
+        this.hasMorePages = hasMorePages;
+    }
+
+    public boolean isLoading() {
+        return isLoading;
+    }
+
+    public void setLoading(boolean loading) {
+        isLoading = loading;
+    }
+
+    public GetStoryPresenter(View view, User user) {
+        this.view = view;
+        this.user = user;
+        this.statusService = new StatusService();
+        this.userService = new UserService();
+    }
+
+    public void loadMoreItems() {
+        if (!isLoading) {   // This guard is important for avoiding a race condition in the scrolling code.
+            isLoading = true;
+            view.setLoadingFooter(true);
+
+            statusService.loadMoreItems(user, PAGE_SIZE, lastStatus, new GetStoryObserver());
+        }
+    }
+
+    public class GetStoryObserver implements StatusService.GetStatusesObserver {
+
+        @Override
+        public void displayMessage(String message) {
+            isLoading = false;
+            view.setLoadingFooter(false);
+            view.displayMessage(message);
         }
 
         @Override
-        public void handleMessage(@NonNull Message msg) {
+        public void addItems(List<Status> statuses, boolean hasMorePages) {
             isLoading = false;
-            removeLoadingFooter();
+            view.setLoadingFooter(false);
 
-            boolean success = msg.getData().getBoolean(GetStoryTask.SUCCESS_KEY);
-            if (success) {
-                List<Status> statuses = (List<Status>) msg.getData().getSerializable(GetStoryTask.STATUSES_KEY);
-                hasMorePages = msg.getData().getBoolean(GetStoryTask.MORE_PAGES_KEY);
-
-                lastStatus = (statuses.size() > 0) ? statuses.get(statuses.size() - 1) : null;
-
-                storyRecyclerViewAdapter.addItems(statuses);
-            } else if (msg.getData().containsKey(GetStoryTask.MESSAGE_KEY)) {
-                String message = msg.getData().getString(GetStoryTask.MESSAGE_KEY);
-                Toast.makeText(getContext(), "Failed to get story: " + message, Toast.LENGTH_LONG).show();
-            } else if (msg.getData().containsKey(GetStoryTask.EXCEPTION_KEY)) {
-                Exception ex = (Exception) msg.getData().getSerializable(GetStoryTask.EXCEPTION_KEY);
-                Toast.makeText(getContext(), "Failed to get story because of exception: " + ex.getMessage(), Toast.LENGTH_LONG).show();
-            }
+            lastStatus = (statuses.size() > 0) ? statuses.get(statuses.size() - 1) : null;
+            setHasMorePages(hasMorePages);
+            view.addMoreItems(statuses);
         }
     }
+
+    public class GetUserObserver implements UserService.GetUserObserver {
+
+        @Override
+        public void displayMessage(String message) {
+            view.displayMessage(message);
+        }
+
+        @Override
+        public void startUserActivity(User user) {
+            view.startUserActivity(user);
+        }
+    }
+
 }

@@ -7,7 +7,7 @@ import edu.byu.cs.tweeter.client.model.service.UserService;
 import edu.byu.cs.tweeter.model.domain.Status;
 import edu.byu.cs.tweeter.model.domain.User;
 
-public class FeedPresenter {
+public class GetFeedPresenter {
 
     private static final int PAGE_SIZE = 10;
 
@@ -49,7 +49,7 @@ public class FeedPresenter {
         isLoading = loading;
     }
 
-    public FeedPresenter(View view, User user) {
+    public GetFeedPresenter(View view, User user) {
         this.view = view;
         this.user = user;
         this.statusService = new StatusService();
@@ -66,12 +66,10 @@ public class FeedPresenter {
             view.setLoadingFooter(true);
 
             statusService.loadMoreItems(user, PAGE_SIZE, lastStatus, new GetFeedObserver());
-
-
         }
     }
 
-    public class GetFeedObserver implements StatusService.GetFeedObserver {
+    public class GetFeedObserver implements StatusService.GetStatusesObserver {
 
         @Override
         public void displayMessage(String message) {

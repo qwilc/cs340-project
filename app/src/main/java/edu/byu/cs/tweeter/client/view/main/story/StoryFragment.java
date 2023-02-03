@@ -186,34 +186,6 @@ public class StoryFragment extends Fragment {
             post.setClickable(true);
             post.setMovementMethod(LinkMovementMethod.getInstance());
         }
-
-        /**
-         * Message handler (i.e., observer) for GetUserTask.
-         */
-        private class GetUserHandler extends Handler {
-
-            public GetUserHandler() {
-                super(Looper.getMainLooper());
-            }
-
-            @Override
-            public void handleMessage(@NonNull Message msg) {
-                boolean success = msg.getData().getBoolean(GetUserTask.SUCCESS_KEY);
-                if (success) {
-                    User user = (User) msg.getData().getSerializable(GetUserTask.USER_KEY);
-
-                    Intent intent = new Intent(getContext(), MainActivity.class);
-                    intent.putExtra(MainActivity.CURRENT_USER_KEY, user);
-                    startActivity(intent);
-                } else if (msg.getData().containsKey(GetUserTask.MESSAGE_KEY)) {
-                    String message = msg.getData().getString(GetUserTask.MESSAGE_KEY);
-                    Toast.makeText(getContext(), "Failed to get user's profile: " + message, Toast.LENGTH_LONG).show();
-                } else if (msg.getData().containsKey(GetUserTask.EXCEPTION_KEY)) {
-                    Exception ex = (Exception) msg.getData().getSerializable(GetUserTask.EXCEPTION_KEY);
-                    Toast.makeText(getContext(), "Failed to get user's profile because of exception: " + ex.getMessage(), Toast.LENGTH_LONG).show();
-                }
-            }
-        }
     }
 
     /**
@@ -364,39 +336,6 @@ public class StoryFragment extends Fragment {
          */
         private void removeLoadingFooter() {
             removeItem(story.get(story.size() - 1));
-        }
-
-
-        /**
-         * Message handler (i.e., observer) for GetStoryTask.
-         */
-        private class GetStoryHandler extends Handler {
-
-            public GetStoryHandler() {
-                super(Looper.getMainLooper());
-            }
-
-            @Override
-            public void handleMessage(@NonNull Message msg) {
-                isLoading = false;
-                removeLoadingFooter();
-
-                boolean success = msg.getData().getBoolean(GetStoryTask.SUCCESS_KEY);
-                if (success) {
-                    List<Status> statuses = (List<Status>) msg.getData().getSerializable(GetStoryTask.STATUSES_KEY);
-                    hasMorePages = msg.getData().getBoolean(GetStoryTask.MORE_PAGES_KEY);
-
-                    lastStatus = (statuses.size() > 0) ? statuses.get(statuses.size() - 1) : null;
-
-                    storyRecyclerViewAdapter.addItems(statuses);
-                } else if (msg.getData().containsKey(GetStoryTask.MESSAGE_KEY)) {
-                    String message = msg.getData().getString(GetStoryTask.MESSAGE_KEY);
-                    Toast.makeText(getContext(), "Failed to get story: " + message, Toast.LENGTH_LONG).show();
-                } else if (msg.getData().containsKey(GetStoryTask.EXCEPTION_KEY)) {
-                    Exception ex = (Exception) msg.getData().getSerializable(GetStoryTask.EXCEPTION_KEY);
-                    Toast.makeText(getContext(), "Failed to get story because of exception: " + ex.getMessage(), Toast.LENGTH_LONG).show();
-                }
-            }
         }
     }
 

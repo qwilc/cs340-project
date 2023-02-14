@@ -52,7 +52,7 @@ public class FollowingFragment extends Fragment implements GetFollowingPresenter
     public static FollowingFragment newInstance(User user) {
         FollowingFragment fragment = new FollowingFragment();
 
-        Bundle args = new Bundle(1); // TODO: Do I need to do anything with this?
+        Bundle args = new Bundle(1);
         args.putSerializable(USER_KEY, user);
 
         fragment.setArguments(args);

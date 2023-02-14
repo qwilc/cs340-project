@@ -17,7 +17,7 @@ import edu.byu.cs.tweeter.util.Pair;
 /**
  * Background task that retrieves a page of statuses from a user's feed.
  */
-public class GetFeedTask implements Runnable {
+public class GetFeedTask extends AuthenticatedTask {
     private static final String LOG_TAG = "GetFeedTask";
 
     public static final String SUCCESS_KEY = "success";
@@ -26,10 +26,9 @@ public class GetFeedTask implements Runnable {
     public static final String MESSAGE_KEY = "message";
     public static final String EXCEPTION_KEY = "exception";
 
-    /**
-     * Auth token for logged-in user.
-     */
-    private AuthToken authToken;
+    List<Status> statuses;
+    boolean hasMorePages;
+
     /**
      * The user whose feed is being retrieved.
      * (This can be any user, not just the currently logged-in user.)
@@ -51,27 +50,24 @@ public class GetFeedTask implements Runnable {
 
     public GetFeedTask(AuthToken authToken, User targetUser, int limit, Status lastStatus,
                        Handler messageHandler) {
-        this.authToken = authToken;
+        super(messageHandler, authToken);
         this.targetUser = targetUser;
         this.limit = limit;
         this.lastStatus = lastStatus;
-        this.messageHandler = messageHandler;
     }
 
     @Override
-    public void run() {
-        try {
-            Pair<List<Status>, Boolean> pageOfStatus = getFeed();
+    protected void processTask() {
+        Pair<List<Status>, Boolean> pageOfStatus = getFeed();
 
-            List<Status> statuses = pageOfStatus.getFirst();
-            boolean hasMorePages = pageOfStatus.getSecond();
+        statuses = pageOfStatus.getFirst();
+        hasMorePages = pageOfStatus.getSecond();
+    }
 
-            sendSuccessMessage(statuses, hasMorePages);
-
-        } catch (Exception ex) {
-            Log.e(LOG_TAG, ex.getMessage(), ex);
-            sendExceptionMessage(ex);
-        }
+    @Override
+    protected void loadSuccessBundle(Bundle msgBundle) {
+        msgBundle.putSerializable(STATUSES_KEY, (Serializable) statuses);
+        msgBundle.putBoolean(MORE_PAGES_KEY, hasMorePages);
     }
 
     private FakeData getFakeData() {
@@ -83,37 +79,4 @@ public class GetFeedTask implements Runnable {
         return pageOfStatus;
     }
 
-    private void sendSuccessMessage(List<Status> statuses, boolean hasMorePages) {
-        Bundle msgBundle = new Bundle();
-        msgBundle.putBoolean(SUCCESS_KEY, true);
-        msgBundle.putSerializable(STATUSES_KEY, (Serializable) statuses);
-        msgBundle.putBoolean(MORE_PAGES_KEY, hasMorePages);
-
-        Message msg = Message.obtain();
-        msg.setData(msgBundle);
-
-        messageHandler.sendMessage(msg);
-    }
-
-    private void sendFailedMessage(String message) {
-        Bundle msgBundle = new Bundle();
-        msgBundle.putBoolean(SUCCESS_KEY, false);
-        msgBundle.putString(MESSAGE_KEY, message);
-
-        Message msg = Message.obtain();
-        msg.setData(msgBundle);
-
-        messageHandler.sendMessage(msg);
-    }
-
-    private void sendExceptionMessage(Exception exception) {
-        Bundle msgBundle = new Bundle();
-        msgBundle.putBoolean(SUCCESS_KEY, false);
-        msgBundle.putSerializable(EXCEPTION_KEY, exception);
-
-        Message msg = Message.obtain();
-        msg.setData(msgBundle);
-
-        messageHandler.sendMessage(msg);
-    }
 }

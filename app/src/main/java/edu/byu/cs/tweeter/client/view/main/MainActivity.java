@@ -105,11 +105,9 @@ public class MainActivity extends AppCompatActivity implements StatusDialogFragm
 
                 if (followButton.getText().toString().equals(v.getContext().getString(R.string.following))) {
                     presenter.unfollow();
-
                     Toast.makeText(MainActivity.this, "Removing " + selectedUser.getName() + "...", Toast.LENGTH_LONG).show();
                 } else {
                     presenter.follow();
-
                     Toast.makeText(MainActivity.this, "Adding " + selectedUser.getName() + "...", Toast.LENGTH_LONG).show();
                 }
             }

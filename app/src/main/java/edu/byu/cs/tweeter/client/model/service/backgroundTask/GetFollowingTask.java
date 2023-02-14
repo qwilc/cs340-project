@@ -16,7 +16,7 @@ import edu.byu.cs.tweeter.util.Pair;
 /**
  * Background task that retrieves a page of other users being followed by a specified user.
  */
-public class GetFollowingTask implements Runnable {
+public class GetFollowingTask extends AuthenticatedTask {
     private static final String LOG_TAG = "GetFollowingTask";
 
     public static final String SUCCESS_KEY = "success";
@@ -25,10 +25,6 @@ public class GetFollowingTask implements Runnable {
     public static final String MESSAGE_KEY = "message";
     public static final String EXCEPTION_KEY = "exception";
 
-    /**
-     * Auth token for logged-in user.
-     */
-    private AuthToken authToken;
     /**
      * The user whose following is being retrieved.
      * (This can be any user, not just the currently logged-in user.)
@@ -48,29 +44,22 @@ public class GetFollowingTask implements Runnable {
      */
     private Handler messageHandler;
 
+    List<User> followees;
+    boolean hasMorePages;
+
     public GetFollowingTask(AuthToken authToken, User targetUser, int limit, User lastFollowee,
                             Handler messageHandler) {
-        this.authToken = authToken;
+        super(messageHandler, authToken);
         this.targetUser = targetUser;
         this.limit = limit;
         this.lastFollowee = lastFollowee;
-        this.messageHandler = messageHandler;
     }
 
     @Override
-    public void run() {
-        try {
-            Pair<List<User>, Boolean> pageOfUsers = getFollowees();
-
-            List<User> followees = pageOfUsers.getFirst();
-            boolean hasMorePages = pageOfUsers.getSecond();
-
-            sendSuccessMessage(followees, hasMorePages);
-
-        } catch (Exception ex) {
-            Log.e(LOG_TAG, "Failed to get followees", ex);
-            sendExceptionMessage(ex);
-        }
+    protected void processTask() {
+        Pair<List<User>, Boolean> pageOfUsers = getFollowees();
+        followees = pageOfUsers.getFirst();
+        hasMorePages = pageOfUsers.getSecond();
     }
 
     private FakeData getFakeData() {
@@ -81,17 +70,10 @@ public class GetFollowingTask implements Runnable {
         return getFakeData().getPageOfUsers((User) lastFollowee, limit, targetUser);
     }
 
-
-    private void sendSuccessMessage(List<User> followees, boolean hasMorePages) {
-        Bundle msgBundle = new Bundle();
-        msgBundle.putBoolean(SUCCESS_KEY, true);
+    @Override
+    protected void loadSuccessBundle(Bundle msgBundle) {
         msgBundle.putSerializable(FOLLOWEES_KEY, (Serializable) followees);
         msgBundle.putBoolean(MORE_PAGES_KEY, hasMorePages);
-
-        Message msg = Message.obtain();
-        msg.setData(msgBundle);
-
-        messageHandler.sendMessage(msg);
     }
 
     private void sendFailedMessage(String message) {

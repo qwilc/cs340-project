@@ -37,7 +37,7 @@ public class LoginPresenter {
     }
 
 
-    public void validateLogin(String alias, String password) { // TODO: Might need to double check that length and charAt are working
+    public void validateLogin(String alias, String password) {
         if (alias.length() > 0 && alias.charAt(0) != '@') {
             throw new IllegalArgumentException("Alias must begin with @.");
         }

@@ -1,9 +1,6 @@
 package edu.byu.cs.tweeter.client.model.service.backgroundTask;
 
-import android.os.Bundle;
 import android.os.Handler;
-import android.os.Message;
-import android.util.Log;
 
 import edu.byu.cs.tweeter.model.domain.AuthToken;
 import edu.byu.cs.tweeter.model.domain.User;
@@ -12,25 +9,25 @@ import edu.byu.cs.tweeter.model.domain.User;
  * Background task that establishes a following relationship between two users.
  */
 public class FollowTask extends AuthenticatedTask {
-    private static final String LOG_TAG = "FollowTask";
-
     /**
      * The user that is being followed.
      */
-    private User followee;
+    private final User followee;
 
     public FollowTask(AuthToken authToken, User followee, Handler messageHandler) {
-        super(messageHandler, authToken);
+        super(authToken, messageHandler);
         this.followee = followee;
     }
 
     @Override
-    protected void processTask() {
+    protected void runTask() {
+        // We could do this from the presenter, without a task and handler, but we will
+        // eventually access the database from here when we aren't using dummy data.
 
+        // Call sendSuccessMessage if successful
+        sendSuccessMessage();
+        // or call sendFailedMessage if not successful
+        // sendFailedMessage()
     }
 
-    @Override
-    protected void loadSuccessBundle(Bundle msgBundle) {
-
-    }
 }

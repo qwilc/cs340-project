@@ -5,14 +5,9 @@ import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
 
-import androidx.annotation.NonNull;
+import java.io.IOException;
 
-import java.io.Serializable;
-import java.util.List;
-
-import edu.byu.cs.tweeter.model.domain.User;
 import edu.byu.cs.tweeter.util.FakeData;
-import edu.byu.cs.tweeter.util.Pair;
 
 public abstract class BackgroundTask implements Runnable {
     private static final String LOG_TAG = "BackgroundTask";
@@ -24,61 +19,75 @@ public abstract class BackgroundTask implements Runnable {
     /**
      * Message handler that will receive task results.
      */
-    protected Handler messageHandler;
+    private final Handler messageHandler;
 
-    public BackgroundTask(Handler messageHandler) {
+    protected BackgroundTask(Handler messageHandler) {
         this.messageHandler = messageHandler;
     }
 
     @Override
     public void run() {
         try {
-            processTask();
-            sendSuccessMessage();
-
+            runTask();
         } catch (Exception ex) {
-            Log.e(LOG_TAG, "Failed to get followees", ex);
+            Log.e(LOG_TAG, ex.getMessage(), ex);
             sendExceptionMessage(ex);
         }
     }
 
-    protected abstract void processTask();
+    protected abstract void runTask() throws IOException;
 
-    private void sendSuccessMessage() {
-        Bundle msgBundle = createBundle(true);
+    protected FakeData getFakeData() {
+        return FakeData.getInstance();
+    }
+
+    /**
+     * Called by a Task's runTask method when it is successful.
+     *
+     * This method is public to make it accessible to test cases
+     */
+    public void sendSuccessMessage() {
+        Bundle msgBundle = new Bundle();
+        msgBundle.putBoolean(SUCCESS_KEY, true);
         loadSuccessBundle(msgBundle);
         sendMessage(msgBundle);
     }
 
-    protected abstract void loadSuccessBundle(Bundle msgBundle);
-
-    private void sendFailedMessage(String message) {
-        Bundle msgBundle = createBundle(false);
-        msgBundle.putString(MESSAGE_KEY, message);
+    /**
+     * Called by a Task's runTask method when it is not successful.
+     *
+     * This method is public to make it accessible to test cases
+     */
+    public void sendFailedMessage(String errorMessage) {
+        Bundle msgBundle = new Bundle();
+        msgBundle.putBoolean(SUCCESS_KEY, false);
+        msgBundle.putString(MESSAGE_KEY, errorMessage);
         sendMessage(msgBundle);
     }
 
-    private void sendExceptionMessage(Exception exception) {
-        Bundle msgBundle = createBundle(false);
+    /**
+     * Called by a Task's runTask method when an exception occurs.
+     *
+     * This method is public to make it accessible to test cases
+     */
+    public void sendExceptionMessage(Exception exception) {
+        Bundle msgBundle = new Bundle();
+        msgBundle.putBoolean(SUCCESS_KEY, false);
         msgBundle.putSerializable(EXCEPTION_KEY, exception);
         sendMessage(msgBundle);
     }
 
-    @NonNull
-    private Bundle createBundle(boolean b) {
-        Bundle msgBundle = new Bundle();
-        msgBundle.putBoolean(SUCCESS_KEY, b); //TODO: This prolly shouldn't always be SUCCESS_KEY?
-        return msgBundle;
+    /**
+     * Add additional information during a successful task to a Bundle
+     * @param msgBundle The bundle send to the handler with the results of the task
+     */
+    protected void loadSuccessBundle(Bundle msgBundle) {
+        // By default, do nothing
     }
 
     private void sendMessage(Bundle msgBundle) {
         Message msg = Message.obtain();
         msg.setData(msgBundle);
-
         messageHandler.sendMessage(msg);
-    }
-
-    protected FakeData getFakeData() {
-        return FakeData.getInstance();
     }
 }

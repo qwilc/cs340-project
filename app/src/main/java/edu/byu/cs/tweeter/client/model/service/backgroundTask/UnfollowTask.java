@@ -11,43 +11,22 @@ import edu.byu.cs.tweeter.model.domain.User;
 /**
  * Background task that removes a following relationship between two users.
  */
-public class UnfollowTask implements Runnable {
+public class UnfollowTask extends AuthenticatedTask {
     private static final String LOG_TAG = "UnfollowTask";
 
-    public static final String SUCCESS_KEY = "success";
-    public static final String MESSAGE_KEY = "message";
-    public static final String EXCEPTION_KEY = "exception";
-
-    /**
-     * Auth token for logged-in user.
-     * This user is the "follower" in the relationship.
-     */
-    private AuthToken authToken;
     /**
      * The user that is being followed.
      */
     private User followee;
-    /**
-     * Message handler that will receive task results.
-     */
-    private Handler messageHandler;
 
     public UnfollowTask(AuthToken authToken, User followee, Handler messageHandler) {
-        this.authToken = authToken;
+        super(messageHandler, authToken);
         this.followee = followee;
-        this.messageHandler = messageHandler;
     }
 
     @Override
-    public void run() {
-        try {
+    protected void processTask() {
 
-            sendSuccessMessage();
-
-        } catch (Exception ex) {
-            Log.e(LOG_TAG, ex.getMessage(), ex);
-            sendExceptionMessage(ex);
-        }
     }
 
     private void sendSuccessMessage() {
@@ -58,6 +37,11 @@ public class UnfollowTask implements Runnable {
         msg.setData(msgBundle);
 
         messageHandler.sendMessage(msg);
+    }
+
+    @Override
+    protected void loadSuccessBundle(Bundle msgBundle) {
+
     }
 
     private void sendFailedMessage(String message) {

@@ -5,16 +5,13 @@ import edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.Authentic
 import edu.byu.cs.tweeter.model.domain.AuthToken;
 import edu.byu.cs.tweeter.model.domain.User;
 
-public class LoginPresenter extends Presenter {
+public class LoginPresenter extends AuthenticationPresenter {
 
 
-    public interface LoginView extends Presenter.View {
+    public interface LoginView extends AuthenticationView {
 
         void setLoginMessage(boolean value);
 
-        void setErrorView(String message);
-
-        void startUserActivity(User user);
     }
 
     public LoginPresenter(LoginView view) {
@@ -45,7 +42,7 @@ public class LoginPresenter extends Presenter {
         }
     }
 
-    public class LoginObserver implements AuthenticationObserver {
+    public class LoginObserver extends Observer implements AuthenticationObserver {
 
         @Override
         public void handleSuccess(User loggedInUser, AuthToken authToken) {
@@ -57,16 +54,6 @@ public class LoginPresenter extends Presenter {
             ((LoginView)getView()).displayMessage("Hello " + loggedInUser.getName());
 
             ((LoginView)getView()).startUserActivity(loggedInUser);
-        }
-
-        @Override
-        public void handleFailure(String message) {
-            ((LoginView)getView()).displayMessage("Failed to login: " + message);
-        }
-
-        @Override
-        public void handleException(Exception ex) {
-            ((LoginView)getView()).displayMessage("Failed to logout because of exception: " + ex.getMessage());
         }
     }
 }

@@ -6,11 +6,9 @@ import edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.Authentic
 import edu.byu.cs.tweeter.model.domain.AuthToken;
 import edu.byu.cs.tweeter.model.domain.User;
 
-public class RegisterPresenter {
+public class RegisterPresenter extends Presenter {
 
-    public interface View {
-
-        void displayMessage(String message);
+    public interface RegisterView extends AuthenticationPresenter.AuthenticationView {
 
         void setRegisterMessage(boolean value);
 
@@ -20,30 +18,26 @@ public class RegisterPresenter {
 
         String getEncodedImage();
 
-        void setErrorView(String message);
+
     }
 
-    private View view;
-    private UserService userService;
-
-    public RegisterPresenter(View view) {
-        this.view = view;
-        this.userService = new UserService();
+    public RegisterPresenter(RegisterView view) {
+        super(view);
     }
 
     public void tryRegister(String firstName, String lastName, String alias, String password) {
         try {
             validateRegistration(firstName, lastName, alias, password);
-            view.setErrorView(null);
-            view.setRegisterMessage(true);
+            ((RegisterView)getView()).setErrorView(null);
+            ((RegisterView)getView()).setRegisterMessage(true);
 
-            String imageBytesBase64 = view.getEncodedImage();
+            String imageBytesBase64 = ((RegisterView)getView()).getEncodedImage();
 
             // Send register request.
-            userService.register(firstName, lastName, alias, password, imageBytesBase64, new RegisterObserver());
+            getUserService().register(firstName, lastName, alias, password, imageBytesBase64, new RegisterObserver());
 
         } catch (Exception e) {
-            view.setErrorView(e.getMessage());
+            ((RegisterView)getView()).setErrorView(e.getMessage());
         }
     }
 
@@ -67,10 +61,10 @@ public class RegisterPresenter {
             throw new IllegalArgumentException("Password cannot be empty.");
         }
 
-        view.validateImage();
+        ((RegisterView)getView()).validateImage();
     }
     
-    public class RegisterObserver implements AuthenticationObserver {
+    public class RegisterObserver extends Observer implements AuthenticationObserver {
 
         @Override
         public void handleSuccess(User registeredUser, AuthToken authToken) {
@@ -78,25 +72,15 @@ public class RegisterPresenter {
             Cache.getInstance().setCurrUser(registeredUser);
             Cache.getInstance().setCurrUserAuthToken(authToken);
 
-            view.setRegisterMessage(false);
+            ((RegisterView)getView()).setRegisterMessage(false);
 
-            view.displayMessage("Hello " + registeredUser.getName());
+            ((RegisterView)getView()).displayMessage("Hello " + registeredUser.getName());
             try {
-                view.startUserActivity(registeredUser);
+                ((RegisterView)getView()).startUserActivity(registeredUser);
 
             } catch (Exception e) {
                 System.out.println(e.getMessage());
             }
-        }
-
-        @Override
-        public void handleFailure(String message) {
-            view.displayMessage(message);
-        }
-
-        @Override
-        public void handleException(Exception ex) {
-            view.displayMessage(ex.getMessage());
         }
     }
 

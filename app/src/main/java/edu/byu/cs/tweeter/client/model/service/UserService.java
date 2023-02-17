@@ -20,9 +20,11 @@ public class UserService {
 
     public interface GetUserObserver {
 
-        void displayMessage(String message);
+        void handleFailure(String message);
 
-        void startUserActivity(User user);
+        void handleSuccess(User user);
+
+        void handleException(Exception ex);
     }
 
     public interface LoginObserver {

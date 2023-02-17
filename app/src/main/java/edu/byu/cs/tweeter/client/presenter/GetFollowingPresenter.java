@@ -98,13 +98,18 @@ public class GetFollowingPresenter {
     public class GetUserObserver implements UserService.GetUserObserver {
 
         @Override
-        public void displayMessage(String message) {
+        public void handleFailure(String message) {
             view.displayMessage(message);
         }
 
         @Override
-        public void startUserActivity(User user) {
+        public void handleSuccess(User user) {
             view.startUserActivity(user);
+        }
+
+        @Override
+        public void handleException(Exception ex) {
+            view.displayMessage(ex.getMessage());
         }
     }
 }

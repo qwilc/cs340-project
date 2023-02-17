@@ -27,13 +27,13 @@ public class GetUserHandler extends Handler {
         boolean success = msg.getData().getBoolean(GetUserTask.SUCCESS_KEY);
         if (success) {
             User user = (User) msg.getData().getSerializable(GetUserTask.USER_KEY);
-            observer.startUserActivity(user);
+            observer.handleSuccess(user);
         } else if (msg.getData().containsKey(GetUserTask.MESSAGE_KEY)) {
             String message = msg.getData().getString(GetUserTask.MESSAGE_KEY);
-            observer.displayMessage("Failed to get user's profile: " + message);
+            observer.handleFailure(message);
         } else if (msg.getData().containsKey(GetUserTask.EXCEPTION_KEY)) {
             Exception ex = (Exception) msg.getData().getSerializable(GetUserTask.EXCEPTION_KEY);
-            observer.displayMessage("Failed to get user's profile because of exception: " + ex.getMessage());
+            observer.handleException(ex);
         }
     }
 }

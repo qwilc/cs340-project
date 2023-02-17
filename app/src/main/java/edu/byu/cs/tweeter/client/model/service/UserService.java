@@ -1,5 +1,6 @@
 package edu.byu.cs.tweeter.client.model.service;
 
+import java.security.Provider;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -12,6 +13,7 @@ import edu.byu.cs.tweeter.client.model.service.backgroundTask.handler.GetUserHan
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.handler.LoginHandler;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.handler.LogoutHandler;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.handler.RegisterHandler;
+import edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.ServiceObserver;
 import edu.byu.cs.tweeter.client.presenter.MainPresenter;
 import edu.byu.cs.tweeter.client.presenter.RegisterPresenter;
 import edu.byu.cs.tweeter.model.domain.AuthToken;
@@ -36,12 +38,6 @@ public class UserService {
 
     public interface RegisterObserver {
         void handleSuccess(User registeredUser, AuthToken authToken);
-        void handleFailure(String message);
-        void handleException(Exception ex);
-    }
-
-    public interface LogoutObserver {
-        void handleSuccess();
         void handleFailure(String message);
         void handleException(Exception ex);
     }

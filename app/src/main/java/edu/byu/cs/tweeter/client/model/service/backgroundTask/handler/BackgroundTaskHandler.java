@@ -1,6 +1,8 @@
 package edu.byu.cs.tweeter.client.model.service.backgroundTask.handler;
 
+import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.Message;
 
 import androidx.annotation.NonNull;
@@ -13,13 +15,14 @@ public abstract class BackgroundTaskHandler<T extends ServiceObserver> extends H
     private T observer;
 
     public BackgroundTaskHandler(T observer) {
+        super(Looper.getMainLooper());
         this.observer = observer;
     }
 
     public void handleMessage(@NonNull Message msg) {
         boolean success = msg.getData().getBoolean(FollowTask.SUCCESS_KEY);
         if (success) {
-//            observer.handleSuccess();
+            handleSuccess(msg.getData(), observer);
         } else if (msg.getData().containsKey(FollowTask.MESSAGE_KEY)) {
             String message = msg.getData().getString(FollowTask.MESSAGE_KEY);
             observer.handleFailure(message);
@@ -28,5 +31,7 @@ public abstract class BackgroundTaskHandler<T extends ServiceObserver> extends H
             observer.handleException(ex);
         }
     }
+
+    protected abstract void handleSuccess(Bundle data, T observer);
 
 }

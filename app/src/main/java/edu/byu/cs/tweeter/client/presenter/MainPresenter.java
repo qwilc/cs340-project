@@ -63,7 +63,7 @@ public class MainPresenter {
     }
 
     public void updateFollowingAndFollowers() {
-        followService.updateFollowingAndFollowers(selectedUser, new GetCountObserver());
+        followService.updateFollowingAndFollowers(selectedUser, new GetFollowerCountObserver(), new GetFolloweeCountObserver());
     }
 
     public void displayFollowButton() {
@@ -177,7 +177,7 @@ public class MainPresenter {
         }
     }
 
-    public class GetCountObserver implements FollowService.GetCountObserver {
+    public class GetFollowerCountObserver implements FollowService.GetFollowerCountObserver {
         @Override
         public void displayMessage(String message) {
             view.displayMessage(message);
@@ -187,18 +187,24 @@ public class MainPresenter {
         public void displayFollowerCount(int count) {
             view.displayFollowerCount(String.valueOf(count));
         }
+    }
+
+    public class GetFolloweeCountObserver implements FollowService.GetFolloweeCountObserver {
+        @Override
+        public void displayMessage(String message) {
+            view.displayMessage(message);
+        }
 
         @Override
         public void displayFolloweeCount(int count) {
             view.displayFolloweeCount(String.valueOf(count));
         }
-
     }
 
     public class FollowObserver implements SimpleNotificationObserver {
         @Override
         public void handleSuccess() {
-            followService.updateFollowingAndFollowers(selectedUser, new GetCountObserver());
+            followService.updateFollowingAndFollowers(selectedUser, new GetFollowerCountObserver(), new GetFolloweeCountObserver());
             view.updateFollowButton(false);
             view.setFollowButtonEnabled(true);
         }
@@ -219,7 +225,7 @@ public class MainPresenter {
     public class UnfollowObserver implements SimpleNotificationObserver {
         @Override
         public void handleSuccess() {
-            followService.updateFollowingAndFollowers(selectedUser, new GetCountObserver());
+            followService.updateFollowingAndFollowers(selectedUser, new GetFollowerCountObserver(), new GetFolloweeCountObserver());
             view.updateFollowButton(true);
             view.setFollowButtonEnabled(true);
         }

@@ -33,11 +33,16 @@ public class FollowService {
         void handleException(Exception ex);
     }
 
-    public interface GetCountObserver {
+    public interface GetFollowerCountObserver {
 
         void displayMessage(String message);
 
         void displayFollowerCount(int count);
+
+    }
+
+    public interface GetFolloweeCountObserver {
+        void displayMessage(String message);
 
         void displayFolloweeCount(int count);
     }
@@ -69,28 +74,21 @@ public class FollowService {
         executor.execute(getFollowingTask);
     }
 
-    public void loadMoreFollowers(User user, int pageSize, User lastFollower, PagedObserver<User> observer) {
-        GetFollowersTask getFollowersTask = new GetFollowersTask(Cache.getInstance().getCurrUserAuthToken(),
-                user, pageSize, lastFollower, new PagedHandler<>(observer));
-        ExecutorService executor = Executors.newSingleThreadExecutor();
-        executor.execute(getFollowersTask);
-    }
-
-    public void updateFollowingAndFollowers(User user, MainPresenter.GetCountObserver observer) {
+    public void updateFollowingAndFollowers(User user, MainPresenter.GetFollowerCountObserver followerObserver, MainPresenter.GetFolloweeCountObserver followeeObserver) {
         ExecutorService executor = Executors.newFixedThreadPool(2);
 
-        getFollowersCount(executor, user, observer);
-        getFollowingCount(executor, user, observer);
+        getFollowersCount(executor, user, followerObserver);
+        getFollowingCount(executor, user, followeeObserver);
     }
 
-    public void getFollowersCount(ExecutorService executor, User user, MainPresenter.GetCountObserver observer) {
+    public void getFollowersCount(ExecutorService executor, User user, MainPresenter.GetFollowerCountObserver observer) {
         // Get count of most recently selected user's followers.
         GetFollowersCountTask followersCountTask = new GetFollowersCountTask(Cache.getInstance().getCurrUserAuthToken(),
                 user, new GetFollowersCountHandler(observer));
         executor.execute(followersCountTask);
     }
 
-    public void getFollowingCount(ExecutorService executor, User user, MainPresenter.GetCountObserver observer) {
+    public void getFollowingCount(ExecutorService executor, User user, MainPresenter.GetFolloweeCountObserver observer) {
         // Get count of most recently selected user's followees (who they are following)
         GetFollowingCountTask followingCountTask = new GetFollowingCountTask(Cache.getInstance().getCurrUserAuthToken(),
                 user, new GetFollowingCountHandler(observer));

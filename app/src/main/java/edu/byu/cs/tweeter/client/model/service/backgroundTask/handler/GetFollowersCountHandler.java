@@ -10,9 +10,9 @@ import edu.byu.cs.tweeter.client.model.service.FollowService;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.GetFollowersCountTask;
 
 public class GetFollowersCountHandler extends Handler {
-    private FollowService.GetCountObserver observer;
+    private FollowService.GetFollowerCountObserver observer;
 
-    public GetFollowersCountHandler(FollowService.GetCountObserver observer) {
+    public GetFollowersCountHandler(FollowService.GetFollowerCountObserver observer) {
         super(Looper.getMainLooper());
         this.observer = observer;
     }

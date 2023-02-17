@@ -1,5 +1,6 @@
 package edu.byu.cs.tweeter.client.model.service.backgroundTask.handler;
 
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -8,28 +9,17 @@ import androidx.annotation.NonNull;
 
 import edu.byu.cs.tweeter.client.model.service.FollowService;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.IsFollowerTask;
+import edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.IsFollowerObserverInterface;
 
-public class IsFollowerHandler extends Handler {
+public class IsFollowerHandler extends BackgroundTaskHandler<IsFollowerObserverInterface> {
 
-    private FollowService.IsFollowerObserver observer;
-
-    public IsFollowerHandler(FollowService.IsFollowerObserver observer) {
-        super(Looper.getMainLooper());
-        this.observer = observer;
+    public IsFollowerHandler(IsFollowerObserverInterface observer) {
+        super(observer);
     }
 
     @Override
-    public void handleMessage(@NonNull Message msg) {
-        boolean success = msg.getData().getBoolean(IsFollowerTask.SUCCESS_KEY);
-        if (success) {
-            boolean isFollower = msg.getData().getBoolean(IsFollowerTask.IS_FOLLOWER_KEY);
-            observer.handleSuccess(isFollower);
-        } else if (msg.getData().containsKey(IsFollowerTask.MESSAGE_KEY)) {
-            String message = msg.getData().getString(IsFollowerTask.MESSAGE_KEY);
-            observer.handleFailure(message);
-        } else if (msg.getData().containsKey(IsFollowerTask.EXCEPTION_KEY)) {
-            Exception ex = (Exception) msg.getData().getSerializable(IsFollowerTask.EXCEPTION_KEY);
-            observer.handleException(ex);
-        }
+    protected void handleSuccess(Bundle data, IsFollowerObserverInterface observer) {
+        boolean isFollower = data.getBoolean(IsFollowerTask.IS_FOLLOWER_KEY);
+        observer.handleSuccess(isFollower);
     }
 }

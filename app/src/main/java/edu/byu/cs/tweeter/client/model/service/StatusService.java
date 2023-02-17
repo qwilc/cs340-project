@@ -8,7 +8,7 @@ import edu.byu.cs.tweeter.client.cache.Cache;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.GetFeedTask;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.PostStatusTask;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.handler.PagedHandler;
-import edu.byu.cs.tweeter.client.model.service.backgroundTask.handler.PostStatusHandler;
+import edu.byu.cs.tweeter.client.model.service.backgroundTask.handler.SimpleHandler;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.PagedObserver;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.SimpleNotificationObserver;
 import edu.byu.cs.tweeter.model.domain.Status;
@@ -42,7 +42,7 @@ public class StatusService {
 
     public void postStatus(Status status, SimpleNotificationObserver observer) {
         PostStatusTask statusTask = new PostStatusTask(Cache.getInstance().getCurrUserAuthToken(),
-                status, new PostStatusHandler(observer));
+                status, new SimpleHandler(observer));
         ExecutorService executor = Executors.newSingleThreadExecutor();
         executor.execute(statusTask);
     }

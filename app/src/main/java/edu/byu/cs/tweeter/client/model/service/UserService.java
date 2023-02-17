@@ -10,7 +10,7 @@ import edu.byu.cs.tweeter.client.model.service.backgroundTask.LogoutTask;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.RegisterTask;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.handler.AuthenticationHandler;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.handler.GetUserHandler;
-import edu.byu.cs.tweeter.client.model.service.backgroundTask.handler.LogoutHandler;
+import edu.byu.cs.tweeter.client.model.service.backgroundTask.handler.SimpleHandler;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.AuthenticationObserver;
 import edu.byu.cs.tweeter.client.presenter.MainPresenter;
 import edu.byu.cs.tweeter.model.domain.AuthToken;
@@ -61,7 +61,7 @@ public class UserService {
     }
 
     public void logout(MainPresenter.LogOutObserver observer) {
-        LogoutTask logoutTask = new LogoutTask(Cache.getInstance().getCurrUserAuthToken(), new LogoutHandler(observer));
+        LogoutTask logoutTask = new LogoutTask(Cache.getInstance().getCurrUserAuthToken(), new SimpleHandler(observer));
         ExecutorService executor = Executors.newSingleThreadExecutor();
         executor.execute(logoutTask);
     }

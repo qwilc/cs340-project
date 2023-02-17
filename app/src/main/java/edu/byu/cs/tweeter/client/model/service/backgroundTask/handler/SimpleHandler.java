@@ -4,9 +4,8 @@ import android.os.Bundle;
 
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.SimpleNotificationObserver;
 
-public class LogoutHandler extends BackgroundTaskHandler<SimpleNotificationObserver> {
-
-    public LogoutHandler(SimpleNotificationObserver observer) {
+public class SimpleHandler extends BackgroundTaskHandler<SimpleNotificationObserver> {
+    public SimpleHandler(SimpleNotificationObserver observer) {
         super(observer);
     }
 

@@ -63,7 +63,7 @@ public abstract class PagedPresenter<T> extends FragmentPresenter {
 
     public abstract void callService();
 
-    public class PagedObserver extends Observer implements edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.PagedObserver<T> {
+    public abstract class PagedObserver extends Observer implements edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.PagedObserver<T> {
 
         @Override
         public void handleSuccess(List<T> items, boolean hasMorePages) {
@@ -89,10 +89,10 @@ public abstract class PagedPresenter<T> extends FragmentPresenter {
             super.handleException(ex);
         }
 
-        @Override
-        public String getPrefix() {
-            return "Failed to get page";
-        }
+//        @Override
+//        public String getPrefix() {
+//            return "Failed to get page";
+//        }
     }
 
     public class GetUserObserver extends Observer implements UserObserver {

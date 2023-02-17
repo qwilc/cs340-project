@@ -5,13 +5,8 @@ import java.util.List;
 import edu.byu.cs.tweeter.model.domain.User;
 
 public class GetFollowersPresenter extends UserPagePresenter {
-    private static final int PAGE_SIZE = 10;
 
-    public interface GetFollowersView extends PagedView<User> {
-
-    }
-
-    public GetFollowersPresenter(GetFollowersView view, User user) {
+    public GetFollowersPresenter(PagedView<User> view, User user) {
         super(view, user);
     }
 

@@ -11,7 +11,7 @@ public abstract class UserPagePresenter extends PagedPresenter<User> {
         return followService;
     }
 
-    public UserPagePresenter(PagedView view, User user) {
+    public UserPagePresenter(PagedView<User> view, User user) {
         super(view, user);
         this.followService = new FollowService();
     }

@@ -25,10 +25,10 @@ public class LogoutHandler extends Handler {
             observer.handleSuccess();
         } else if (msg.getData().containsKey(LogoutTask.MESSAGE_KEY)) {
             String message = msg.getData().getString(LogoutTask.MESSAGE_KEY);
-            observer.displayMessage("Failed to login: " + message);
+            observer.handleFailure(message);
         } else if (msg.getData().containsKey(LogoutTask.EXCEPTION_KEY)) {
             Exception ex = (Exception) msg.getData().getSerializable(LogoutTask.EXCEPTION_KEY);
-            observer.displayMessage("Failed to logout because of exception: " + ex.getMessage());
+            observer.handleException(ex);
         }
     }
 }

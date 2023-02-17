@@ -26,10 +26,9 @@ public class UserService {
     }
 
     public interface LoginObserver {
-
-        void displayMessage(String s);
-
         void handleSuccess(User loggedInUser);
+        void handleFailure(String message);
+        void handleException(Exception ex);
     }
 
     public interface RegisterObserver {
@@ -39,10 +38,9 @@ public class UserService {
     }
 
     public interface LogoutObserver {
-
-        void displayMessage(String s);
-
         void handleSuccess();
+        void handleFailure(String message);
+        void handleException(Exception ex);
     }
 
     public void getUser(String userAlias, GetUserObserver observer) {

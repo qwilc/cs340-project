@@ -52,16 +52,21 @@ public class LoginPresenter {
     public class LoginObserver implements UserService.LoginObserver {
 
         @Override
-        public void displayMessage(String s) {
-            view.displayMessage(s);
-        }
-
-        @Override
         public void handleSuccess(User loggedInUser) {
             view.setLoginMessage(false);
             view.displayMessage("Hello " + loggedInUser.getName());
 
             view.startUserActivity(loggedInUser);
+        }
+
+        @Override
+        public void handleFailure(String message) {
+            view.displayMessage("Failed to login: " + message);
+        }
+
+        @Override
+        public void handleException(Exception ex) {
+            view.displayMessage("Failed to logout because of exception: " + ex.getMessage());
         }
     }
 }

@@ -230,15 +230,21 @@ public class MainPresenter {
     }
 
     public class LogOutObserver implements UserService.LogoutObserver {
-        @Override
-        public void displayMessage(String message) {
-            view.displayMessage(message);
-        }
 
         @Override
         public void handleSuccess() {
             view.setLogOutMessage(false);
             view.logoutUser();
+        }
+
+        @Override
+        public void handleFailure(String message) {
+            view.displayMessage(message);
+        }
+
+        @Override
+        public void handleException(Exception ex) {
+            view.displayMessage("Failed to log out because of exception: " + ex.getMessage());
         }
     }
 

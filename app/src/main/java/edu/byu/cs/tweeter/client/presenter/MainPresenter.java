@@ -9,6 +9,7 @@ import edu.byu.cs.tweeter.client.cache.Cache;
 import edu.byu.cs.tweeter.client.model.service.FollowService;
 import edu.byu.cs.tweeter.client.model.service.StatusService;
 import edu.byu.cs.tweeter.client.model.service.UserService;
+import edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.GetCountObserver;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.IsFollowerObserverInterface;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.ServiceObserver;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.SimpleNotificationObserver;
@@ -177,27 +178,38 @@ public class MainPresenter {
         }
     }
 
-    public class GetFollowerCountObserver implements FollowService.GetFollowerCountObserver {
+    public class GetFollowerCountObserver implements GetCountObserver {
+
         @Override
-        public void displayMessage(String message) {
+        public void handleSuccess(int count) {
+            view.displayFollowerCount(String.valueOf(count));
+        }
+
+        @Override
+        public void handleFailure(String message) {
             view.displayMessage(message);
         }
 
         @Override
-        public void displayFollowerCount(int count) {
-            view.displayFollowerCount(String.valueOf(count));
+        public void handleException(Exception ex) {
+            view.displayMessage(ex.getMessage());
         }
     }
 
-    public class GetFolloweeCountObserver implements FollowService.GetFolloweeCountObserver {
+    public class GetFolloweeCountObserver implements GetCountObserver {
         @Override
-        public void displayMessage(String message) {
+        public void handleSuccess(int count) {
+            view.displayFolloweeCount(String.valueOf(count));
+        }
+
+        @Override
+        public void handleFailure(String message) {
             view.displayMessage(message);
         }
 
         @Override
-        public void displayFolloweeCount(int count) {
-            view.displayFolloweeCount(String.valueOf(count));
+        public void handleException(Exception ex) {
+            view.displayMessage(ex.getMessage());
         }
     }
 

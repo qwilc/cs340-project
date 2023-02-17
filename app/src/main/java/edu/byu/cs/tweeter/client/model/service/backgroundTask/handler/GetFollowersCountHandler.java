@@ -8,13 +8,13 @@ import androidx.annotation.NonNull;
 
 import edu.byu.cs.tweeter.client.model.service.FollowService;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.GetFollowersCountTask;
+import edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.GetCountObserver;
 
-public class GetFollowersCountHandler extends Handler {
+public class GetFollowersCountHandler extends GetCountHandler {
     private FollowService.GetFollowerCountObserver observer;
 
-    public GetFollowersCountHandler(FollowService.GetFollowerCountObserver observer) {
-        super(Looper.getMainLooper());
-        this.observer = observer;
+    public GetFollowersCountHandler(GetCountObserver observer) {
+        super(observer);
     }
 
     @Override

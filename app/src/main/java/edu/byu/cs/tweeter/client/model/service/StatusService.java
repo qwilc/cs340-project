@@ -16,23 +16,6 @@ import edu.byu.cs.tweeter.model.domain.User;
 
 public class StatusService {
 
-    public interface GetStatusesObserver {
-        void handleSuccess(List<Status> statuses, boolean hasMorePages);
-
-        void handleFailure(String message);
-
-        void handleException(Exception ex);
-    }
-
-    public interface PostStatusObserver {
-
-        void handleSuccess();
-
-        void handleFailure(String message);
-
-        void handleException(Exception ex);
-    }
-
     public void loadMoreItems(User user, int pageSize, Status lastStatus, PagedObserver observer) {
         GetFeedTask getFeedTask = new GetFeedTask(Cache.getInstance().getCurrUserAuthToken(),
                 user, pageSize, lastStatus, new PagedHandler<Status>(observer));

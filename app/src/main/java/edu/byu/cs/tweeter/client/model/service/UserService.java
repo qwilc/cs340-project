@@ -19,27 +19,6 @@ import edu.byu.cs.tweeter.model.domain.User;
 
 public class UserService {
 
-    public interface GetUserObserver {
-
-        void handleFailure(String message);
-
-        void handleSuccess(User user);
-
-        void handleException(Exception ex);
-    }
-
-    public interface LoginObserver {
-        void handleSuccess(User loggedInUser, AuthToken authToken);
-        void handleFailure(String message);
-        void handleException(Exception ex);
-    }
-
-    public interface RegisterObserver {
-        void handleSuccess(User registeredUser, AuthToken authToken);
-        void handleFailure(String message);
-        void handleException(Exception ex);
-    }
-
     public void getUser(String userAlias, UserObserver observer) {
         GetUserTask getUserTask = new GetUserTask(Cache.getInstance().getCurrUserAuthToken(),
                 userAlias, new GetUserHandler(observer));

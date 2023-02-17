@@ -8,7 +8,7 @@ public class LoginPresenter extends AuthenticationPresenter {
         super(view);
     }
 
-    public void tryLogin(String alias, String password) {
+    public void tryLogin(String alias, String password) { // TODO: Combine with tryRegister somehow? Or too different?
         try {
             validateLoginInfo(alias, password);
             ((AuthenticationView)getView()).setErrorView(null);

@@ -41,10 +41,6 @@ public class MainPresenter extends Presenter {
 
     private User selectedUser;
 
-    public User getSelectedUser() {
-        return selectedUser;
-    }
-
     public void setSelectedUser(User selectedUser) {
         this.selectedUser = selectedUser;
     }
@@ -131,7 +127,7 @@ public class MainPresenter extends Presenter {
         }
     }
 
-    //TODO: This is probably not the way
+    //TODO: This is probably not the way (How to de-dup follow/unfollow?)
     public abstract class FollowButtonObserver extends Observer implements SimpleNotificationObserver {
         @Override
         public void handleSuccess() {

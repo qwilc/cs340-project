@@ -14,6 +14,7 @@ import edu.byu.cs.tweeter.client.model.service.backgroundTask.handler.LogoutHand
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.handler.RegisterHandler;
 import edu.byu.cs.tweeter.client.presenter.MainPresenter;
 import edu.byu.cs.tweeter.client.presenter.RegisterPresenter;
+import edu.byu.cs.tweeter.model.domain.AuthToken;
 import edu.byu.cs.tweeter.model.domain.User;
 
 public class UserService {
@@ -34,7 +35,7 @@ public class UserService {
     }
 
     public interface RegisterObserver {
-        void handleSuccess(User registeredUser);
+        void handleSuccess(User registeredUser, AuthToken authToken);
         void handleFailure(String message);
         void handleException(Exception ex);
     }

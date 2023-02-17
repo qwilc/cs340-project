@@ -42,9 +42,11 @@ public class FollowService {
     }
 
     public interface IsFollowerObserver {
-        void displayMessage(String message);
+        void handleFailure(String message);
 
-        void displayFollowButton(boolean isFollower);
+        void handleSuccess(boolean isFollower);
+
+        void handleException(Exception ex);
     }
 
     public interface FollowObserver {

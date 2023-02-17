@@ -159,13 +159,18 @@ public class MainPresenter {
 
     public class IsFollowerObserver implements FollowService.IsFollowerObserver {
         @Override
-        public void displayMessage(String message) {
+        public void handleFailure (String message) {
             view.displayMessage(message);
         }
 
         @Override
-        public void displayFollowButton(boolean isFollower) {
+        public void handleSuccess (boolean isFollower) {
             view.displayFollowButton(isFollower);
+        }
+
+        @Override
+        public void handleException(Exception ex) {
+            view.displayMessage(ex.getMessage());
         }
     }
 
@@ -251,13 +256,19 @@ public class MainPresenter {
     public class PostStatusObserver implements StatusService.PostStatusObserver {
 
         @Override
-        public void displayMessage(String message) {
+        public void handleSuccess() {
+            view.displayMessage("Successfully Posted!");
+            view.setPostingMessage(false);
+        }
+
+        @Override
+        public void handleFailure(String message) {
             view.displayMessage(message);
         }
 
         @Override
-        public void setPostingMessage(boolean value) {
-            view.setPostingMessage(value);
+        public void handleException(Exception ex) {
+            view.displayMessage(ex.getMessage());
         }
     }
 }

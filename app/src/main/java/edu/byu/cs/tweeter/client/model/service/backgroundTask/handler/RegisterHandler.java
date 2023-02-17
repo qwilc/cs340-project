@@ -28,10 +28,7 @@ public class RegisterHandler extends Handler {
             User registeredUser = (User) msg.getData().getSerializable(RegisterTask.USER_KEY);
             AuthToken authToken = (AuthToken) msg.getData().getSerializable(RegisterTask.AUTH_TOKEN_KEY);
 
-            Cache.getInstance().setCurrUser(registeredUser);
-            Cache.getInstance().setCurrUserAuthToken(authToken);
-
-            observer.handleSuccess(registeredUser);
+            observer.handleSuccess(registeredUser, authToken);
 
         } else if (msg.getData().containsKey(RegisterTask.MESSAGE_KEY)) {
             String message = msg.getData().getString(RegisterTask.MESSAGE_KEY);

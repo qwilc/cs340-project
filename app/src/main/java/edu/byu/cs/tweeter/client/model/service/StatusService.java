@@ -26,9 +26,11 @@ public class StatusService {
 
     public interface PostStatusObserver {
 
-        void displayMessage(String message);
+        void handleSuccess();
 
-        void setPostingMessage(boolean value);
+        void handleFailure(String message);
+
+        void handleException(Exception ex);
     }
 
     public void loadMoreItems(User user, int pageSize, Status lastStatus, GetStatusesObserver observer) {

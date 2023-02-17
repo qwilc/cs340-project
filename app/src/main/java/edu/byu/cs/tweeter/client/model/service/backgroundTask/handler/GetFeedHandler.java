@@ -32,13 +32,13 @@ public class GetFeedHandler extends Handler {
             List<Status> statuses = (List<Status>) msg.getData().getSerializable(PagedTask.ITEMS_KEY);
             boolean hasMorePages = msg.getData().getBoolean(GetFeedTask.MORE_PAGES_KEY);
 
-            observer.addItems(statuses, hasMorePages);
+            observer.handleSuccess(statuses, hasMorePages);
         } else if (msg.getData().containsKey(GetFeedTask.MESSAGE_KEY)) {
             String message = msg.getData().getString(GetFeedTask.MESSAGE_KEY);
-            observer.displayMessage("Failed to get feed: " + message);
+            observer.handleFailure(message);
         } else if (msg.getData().containsKey(GetFeedTask.EXCEPTION_KEY)) {
             Exception ex = (Exception) msg.getData().getSerializable(GetFeedTask.EXCEPTION_KEY);
-            observer.displayMessage("Failed to get feed because of exception: " + ex.getMessage());
+            observer.handleException(ex);
         }
     }
 

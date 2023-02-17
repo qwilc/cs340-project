@@ -17,10 +17,11 @@ import edu.byu.cs.tweeter.model.domain.User;
 public class StatusService {
 
     public interface GetStatusesObserver {
+        void handleSuccess(List<Status> statuses, boolean hasMorePages);
 
-        void displayMessage(String message);
+        void handleFailure(String message);
 
-        void addItems(List<Status> statuses, boolean hasMorePages);
+        void handleException(Exception ex);
     }
 
     public interface PostStatusObserver {

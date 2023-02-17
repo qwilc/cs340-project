@@ -72,20 +72,27 @@ public class GetStoryPresenter {
     public class GetStoryObserver implements StatusService.GetStatusesObserver {
 
         @Override
-        public void displayMessage(String message) {
-            isLoading = false;
-            view.setLoadingFooter(false);
-            view.displayMessage(message);
-        }
-
-        @Override
-        public void addItems(List<Status> statuses, boolean hasMorePages) {
+        public void handleSuccess(List<Status> statuses, boolean hasMorePages) {
             isLoading = false;
             view.setLoadingFooter(false);
 
             lastStatus = (statuses.size() > 0) ? statuses.get(statuses.size() - 1) : null;
             setHasMorePages(hasMorePages);
             view.addMoreItems(statuses);
+        }
+
+        @Override
+        public void handleFailure(String message) {
+            isLoading = false;
+            view.setLoadingFooter(false);
+            view.displayMessage(message);
+        }
+
+        @Override
+        public void handleException(Exception ex) {
+            isLoading = false;
+            view.setLoadingFooter(false);
+            view.displayMessage(ex.getMessage());
         }
     }
 

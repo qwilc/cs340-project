@@ -33,13 +33,13 @@ public class GetStoryHandler extends Handler {
             List<Status> statuses = (List<Status>) msg.getData().getSerializable(PagedTask.ITEMS_KEY);
             boolean hasMorePages = msg.getData().getBoolean(GetStoryTask.MORE_PAGES_KEY);
 
-            observer.addItems(statuses, hasMorePages);
+            observer.handleSuccess(statuses, hasMorePages);
         } else if (msg.getData().containsKey(GetStoryTask.MESSAGE_KEY)) {
             String message = msg.getData().getString(GetStoryTask.MESSAGE_KEY);
-            observer.displayMessage("Failed to get story: " + message);
+            observer.handleFailure(message);
         } else if (msg.getData().containsKey(GetStoryTask.EXCEPTION_KEY)) {
             Exception ex = (Exception) msg.getData().getSerializable(GetStoryTask.EXCEPTION_KEY);
-            observer.displayMessage("Failed to get story because of exception: " + ex.getMessage());
+            observer.handleException(ex);
         }
     }
 }

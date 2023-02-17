@@ -1,17 +1,14 @@
 package edu.byu.cs.tweeter.client.presenter;
 
 import edu.byu.cs.tweeter.client.cache.Cache;
-import edu.byu.cs.tweeter.client.model.service.UserService;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.AuthenticationObserver;
 import edu.byu.cs.tweeter.model.domain.AuthToken;
 import edu.byu.cs.tweeter.model.domain.User;
 
-public class LoginPresenter {
+public class LoginPresenter extends Presenter {
 
 
-    public interface View {
-
-        void displayMessage(String s);
+    public interface LoginView extends Presenter.View {
 
         void setLoginMessage(boolean value);
 
@@ -20,22 +17,18 @@ public class LoginPresenter {
         void startUserActivity(User user);
     }
 
-    private View view;
-    private UserService userService;
-
-    public LoginPresenter(View view) {
-        this.view = view;
-        userService = new UserService();
+    public LoginPresenter(LoginView view) {
+        super(view);
     }
 
     public void tryLogin(String alias, String password) {
         try {
             validateLogin(alias, password);
-            view.setErrorView(null);
-            userService.login(alias, password, new LoginObserver());
+            ((LoginView)getView()).setErrorView(null);
+            getUserService().login(alias, password, new LoginObserver());
 
         } catch (Exception e) {
-            view.setErrorView(e.getMessage());
+            ((LoginView)getView()).setErrorView(e.getMessage());
         }
     }
 
@@ -60,20 +53,20 @@ public class LoginPresenter {
             Cache.getInstance().setCurrUser(loggedInUser);
             Cache.getInstance().setCurrUserAuthToken(authToken);
 
-            view.setLoginMessage(false);
-            view.displayMessage("Hello " + loggedInUser.getName());
+            ((LoginView)getView()).setLoginMessage(false);
+            ((LoginView)getView()).displayMessage("Hello " + loggedInUser.getName());
 
-            view.startUserActivity(loggedInUser);
+            ((LoginView)getView()).startUserActivity(loggedInUser);
         }
 
         @Override
         public void handleFailure(String message) {
-            view.displayMessage("Failed to login: " + message);
+            ((LoginView)getView()).displayMessage("Failed to login: " + message);
         }
 
         @Override
         public void handleException(Exception ex) {
-            view.displayMessage("Failed to logout because of exception: " + ex.getMessage());
+            ((LoginView)getView()).displayMessage("Failed to logout because of exception: " + ex.getMessage());
         }
     }
 }

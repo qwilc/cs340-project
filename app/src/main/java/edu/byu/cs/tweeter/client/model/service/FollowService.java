@@ -18,7 +18,9 @@ import edu.byu.cs.tweeter.client.model.service.backgroundTask.handler.GetFollowe
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.handler.GetFollowingCountHandler;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.handler.GetFollowingHandler;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.handler.IsFollowerHandler;
+import edu.byu.cs.tweeter.client.model.service.backgroundTask.handler.PagedHandler;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.handler.UnfollowHandler;
+import edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.PagedObserver;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.SimpleNotificationObserver;
 import edu.byu.cs.tweeter.client.presenter.MainPresenter;
 import edu.byu.cs.tweeter.model.domain.User;
@@ -62,16 +64,16 @@ public class FollowService {
         void handleException(Exception ex);
     }
 
-    public void loadMoreItems(User user, int pageSize, User lastFollowee, GetFollowObserver observer) {
+    public void loadMoreItems(User user, int pageSize, User lastFollowee, PagedObserver observer) {
         GetFollowingTask getFollowingTask = new GetFollowingTask(Cache.getInstance().getCurrUserAuthToken(),
-                user, pageSize, lastFollowee, new GetFollowingHandler(observer));
+                user, pageSize, lastFollowee, new PagedHandler<User>(observer));
         ExecutorService executor = Executors.newSingleThreadExecutor();
         executor.execute(getFollowingTask);
     }
 
-    public void loadMoreFollowers(User user, int pageSize, User lastFollower, GetFollowObserver observer) {
+    public void loadMoreFollowers(User user, int pageSize, User lastFollower, PagedObserver<User> observer) {
         GetFollowersTask getFollowersTask = new GetFollowersTask(Cache.getInstance().getCurrUserAuthToken(),
-                user, pageSize, lastFollower, new GetFollowersHandler(observer));
+                user, pageSize, lastFollower, new PagedHandler<User>(observer));
         ExecutorService executor = Executors.newSingleThreadExecutor();
         executor.execute(getFollowersTask);
     }

@@ -29,7 +29,7 @@ public class UserService {
     }
 
     public interface LoginObserver {
-        void handleSuccess(User loggedInUser);
+        void handleSuccess(User loggedInUser, AuthToken authToken);
         void handleFailure(String message);
         void handleException(Exception ex);
     }

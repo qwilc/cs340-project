@@ -111,7 +111,7 @@ public class RegisterFragment extends Fragment implements RegisterPresenter.Regi
     }
 
     @Override
-    public void setRegisterMessage(boolean value) {
+    public void setAuthenticationMessage(boolean value) {
         if(value) {
             registeringToast.show();
         }

@@ -160,6 +160,11 @@ public class MainPresenter extends Presenter {
         public void handleSuccess (boolean isFollower) {
             ((MainView)getView()).displayFollowButton(isFollower);
         }
+
+        @Override
+        public String getPrefix() {
+            return "Failed to check if user is follower";
+        }
     }
 
     public class GetFollowerCountObserver extends Observer implements GetCountObserver {
@@ -167,12 +172,22 @@ public class MainPresenter extends Presenter {
         public void handleSuccess(int count) {
             ((MainView)getView()).displayFollowerCount(String.valueOf(count));
         }
+
+        @Override
+        public String getPrefix() {
+            return "Failed to get follower count";
+        }
     }
 
     public class GetFolloweeCountObserver extends Observer implements GetCountObserver {
         @Override
         public void handleSuccess(int count) {
             ((MainView)getView()).displayFolloweeCount(String.valueOf(count));
+        }
+
+        @Override
+        public String getPrefix() {
+            return "Failed to get followee count";
         }
     }
 
@@ -225,6 +240,11 @@ public class MainPresenter extends Presenter {
             ((MainView)getView()).setLogOutMessage(false);
             ((MainView)getView()).logoutUser();
         }
+
+        @Override
+        public String getPrefix() {
+            return "Failed to logout";
+        }
     }
 
     public class PostStatusObserver extends Observer implements SimpleNotificationObserver {
@@ -233,6 +253,11 @@ public class MainPresenter extends Presenter {
         public void handleSuccess() {
             ((MainView)getView()).displayMessage("Successfully Posted!");
             ((MainView)getView()).setPostingMessage(false);
+        }
+
+        @Override
+        public String getPrefix() {
+            return "Failed to post status";
         }
     }
 }

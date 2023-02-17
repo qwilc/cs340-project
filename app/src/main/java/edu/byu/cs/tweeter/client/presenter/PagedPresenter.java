@@ -9,7 +9,7 @@ public abstract class PagedPresenter<T> extends FragmentPresenter {
 
     protected static final int PAGE_SIZE = 10; //TODO: Is this fine here? And fine static final?
 
-    public interface PagedView<T> extends SecondaryView {
+    public interface PagedView<T> extends FragmentView {
         void addMoreItems(List<T> items);
 
         void setLoadingFooter(boolean value);
@@ -84,6 +84,11 @@ public abstract class PagedPresenter<T> extends FragmentPresenter {
             ((PagedView<T>)getView()).setLoadingFooter(false);
             super.handleException(ex);
         }
+
+        @Override
+        public String getPrefix() {
+            return "Failed to get page";
+        }
     }
 
     public class GetUserObserver extends Observer implements UserObserver {
@@ -91,5 +96,10 @@ public abstract class PagedPresenter<T> extends FragmentPresenter {
         public void handleSuccess(User user) {
             ((PagedView<T>)getView()).startUserActivity(user);
         } //TODO: This could be a template method in FragmentPresenter
+
+        @Override
+        public String getPrefix() {
+            return "Failed to get user";
+        }
     }
 }

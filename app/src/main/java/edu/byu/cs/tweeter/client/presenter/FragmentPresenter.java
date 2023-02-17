@@ -4,11 +4,11 @@ import edu.byu.cs.tweeter.model.domain.User;
 
 public class FragmentPresenter extends Presenter {
 
-    public FragmentPresenter(SecondaryView view) {
+    public FragmentPresenter(FragmentView view) {
         super(view);
     }
 
-    public interface SecondaryView extends View {
+    public interface FragmentView extends View {
         void startUserActivity(User user);
     }
 }

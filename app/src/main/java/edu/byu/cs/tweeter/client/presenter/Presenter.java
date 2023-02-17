@@ -25,16 +25,18 @@ public abstract class Presenter {
         this.userService = new UserService();
     }
 
-    public class Observer implements ServiceObserver {
+    public abstract class Observer implements ServiceObserver {
 
         @Override
         public void handleFailure(String message) {
-            view.displayMessage("Error: " + message);
+            view.displayMessage(getPrefix() + message);
         }
 
         @Override
         public void handleException(Exception ex) {
-            view.displayMessage("Failed due to exception: " + ex.getMessage());
+            view.displayMessage(getPrefix() + "due to exception: " + ex.getMessage());
         }
+
+        public abstract String getPrefix();
     }
 }

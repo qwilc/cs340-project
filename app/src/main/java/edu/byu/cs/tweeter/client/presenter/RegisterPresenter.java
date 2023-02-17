@@ -1,18 +1,13 @@
 package edu.byu.cs.tweeter.client.presenter;
 
 import edu.byu.cs.tweeter.client.cache.Cache;
-import edu.byu.cs.tweeter.client.model.service.UserService;
-import edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.AuthenticationObserver;
+import edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.AuthenticationServiceObserver;
 import edu.byu.cs.tweeter.model.domain.AuthToken;
 import edu.byu.cs.tweeter.model.domain.User;
 
-public class RegisterPresenter extends Presenter {
+public class RegisterPresenter extends AuthenticationPresenter {
 
     public interface RegisterView extends AuthenticationPresenter.AuthenticationView {
-
-        void setRegisterMessage(boolean value);
-
-        void startUserActivity(User registeredUser);
 
         void validateImage();
 
@@ -29,7 +24,7 @@ public class RegisterPresenter extends Presenter {
         try {
             validateRegistration(firstName, lastName, alias, password);
             ((RegisterView)getView()).setErrorView(null);
-            ((RegisterView)getView()).setRegisterMessage(true);
+            ((RegisterView)getView()).setAuthenticationMessage(true);
 
             String imageBytesBase64 = ((RegisterView)getView()).getEncodedImage();
 
@@ -64,23 +59,11 @@ public class RegisterPresenter extends Presenter {
         ((RegisterView)getView()).validateImage();
     }
     
-    public class RegisterObserver extends Observer implements AuthenticationObserver {
+    public class RegisterObserver extends AuthenticationObserver implements AuthenticationServiceObserver {
 
         @Override
-        public void handleSuccess(User registeredUser, AuthToken authToken) {
-
-            Cache.getInstance().setCurrUser(registeredUser);
-            Cache.getInstance().setCurrUserAuthToken(authToken);
-
-            ((RegisterView)getView()).setRegisterMessage(false);
-
-            ((RegisterView)getView()).displayMessage("Hello " + registeredUser.getName());
-            try {
-                ((RegisterView)getView()).startUserActivity(registeredUser);
-
-            } catch (Exception e) {
-                System.out.println(e.getMessage());
-            }
+        public String getPrefix() {
+            return "Failed to register";
         }
     }
 

@@ -8,7 +8,7 @@ import edu.byu.cs.tweeter.client.model.service.backgroundTask.RegisterTask;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.handler.AuthenticationHandler;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.handler.GetUserHandler;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.handler.SimpleHandler;
-import edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.AuthenticationObserver;
+import edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.AuthenticationServiceObserver;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.UserObserver;
 import edu.byu.cs.tweeter.client.presenter.MainPresenter;
 
@@ -20,12 +20,12 @@ public class UserService {
         TaskExecutor.executeTask(getUserTask);
     }
 
-    public void login(String alias, String password, AuthenticationObserver observer) {
+    public void login(String alias, String password, AuthenticationServiceObserver observer) {
         LoginTask loginTask = new LoginTask(alias, password, new AuthenticationHandler(observer));
         TaskExecutor.executeTask(loginTask);
     }
 
-    public void register(String firstName, String lastName, String alias, String password, String imageBytesBase64, AuthenticationObserver observer) {
+    public void register(String firstName, String lastName, String alias, String password, String imageBytesBase64, AuthenticationServiceObserver observer) {
         RegisterTask registerTask = new RegisterTask(firstName, lastName, alias, password,
                 imageBytesBase64, new AuthenticationHandler(observer));
         TaskExecutor.executeTask(registerTask);

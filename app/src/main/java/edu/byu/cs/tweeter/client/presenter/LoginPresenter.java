@@ -1,16 +1,11 @@
 package edu.byu.cs.tweeter.client.presenter;
 
-import edu.byu.cs.tweeter.client.cache.Cache;
-import edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.AuthenticationObserver;
-import edu.byu.cs.tweeter.model.domain.AuthToken;
-import edu.byu.cs.tweeter.model.domain.User;
+import edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.AuthenticationServiceObserver;
 
 public class LoginPresenter extends AuthenticationPresenter {
 
 
     public interface LoginView extends AuthenticationView {
-
-        void setLoginMessage(boolean value);
 
     }
 
@@ -42,18 +37,11 @@ public class LoginPresenter extends AuthenticationPresenter {
         }
     }
 
-    public class LoginObserver extends Observer implements AuthenticationObserver {
+    public class LoginObserver extends AuthenticationObserver implements AuthenticationServiceObserver {
 
         @Override
-        public void handleSuccess(User loggedInUser, AuthToken authToken) {
-            // Cache user session information
-            Cache.getInstance().setCurrUser(loggedInUser);
-            Cache.getInstance().setCurrUserAuthToken(authToken);
-
-            ((LoginView)getView()).setLoginMessage(false);
-            ((LoginView)getView()).displayMessage("Hello " + loggedInUser.getName());
-
-            ((LoginView)getView()).startUserActivity(loggedInUser);
+        public String getPrefix() {
+            return "Failed to login";
         }
     }
 }

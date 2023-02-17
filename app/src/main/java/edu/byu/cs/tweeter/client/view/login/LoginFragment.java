@@ -71,7 +71,7 @@ public class LoginFragment extends Fragment implements LoginPresenter.LoginView 
     }
 
     @Override
-    public void setLoginMessage(boolean value) {
+    public void setAuthenticationMessage(boolean value) {
         if(value) {
             loginToast.show();
         }

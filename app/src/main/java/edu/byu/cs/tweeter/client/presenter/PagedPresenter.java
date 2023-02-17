@@ -5,9 +5,9 @@ import java.util.List;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.UserObserver;
 import edu.byu.cs.tweeter.model.domain.User;
 
-public class PagedPresenter<T> extends FragmentPresenter {
+public abstract class PagedPresenter<T> extends FragmentPresenter {
 
-    private static final int PAGE_SIZE = 10; //TODO: Is this fine here?
+    protected static final int PAGE_SIZE = 10; //TODO: Is this fine here? And fine static final?
 
     public interface PagedView<T> extends SecondaryView {
         void addMoreItems(List<T> items);
@@ -48,6 +48,16 @@ public class PagedPresenter<T> extends FragmentPresenter {
     public void setLoading(boolean loading) {
         isLoading = loading;
     }
+
+    public void loadMoreItems() {
+        if (!isLoading()) {
+            setLoading(true);
+            ((PagedView)getView()).setLoadingFooter(true);
+            callService();
+        }
+    }
+
+    public abstract void callService();
 
     public class PagedObserver extends Observer implements edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.PagedObserver<T> {
 

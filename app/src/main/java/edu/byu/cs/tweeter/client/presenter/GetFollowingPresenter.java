@@ -10,8 +10,6 @@ import edu.byu.cs.tweeter.model.domain.User;
 
 public class GetFollowingPresenter extends PagedPresenter {
 
-    private static final int PAGE_SIZE = 10;
-
     public interface GetFollowingView extends PagedView<User> {
 
     }
@@ -27,11 +25,8 @@ public class GetFollowingPresenter extends PagedPresenter {
         getUserService().getUser(userAlias, new GetUserObserver());
     }
 
-    public void loadMoreItems() {
-        if (!isLoading()) {
-            setLoading(true);
-            ((PagedView)getView()).setLoadingFooter(true);
-            followService.loadMoreItems(getUser(), PAGE_SIZE, ((User) getLastItem()), new PagedPresenter<User>.PagedObserver());
-        }
+    @Override
+    public void callService() {
+        followService.loadMoreItems(getUser(), PAGE_SIZE, ((User) getLastItem()), new PagedPresenter<User>.PagedObserver());
     }
 }

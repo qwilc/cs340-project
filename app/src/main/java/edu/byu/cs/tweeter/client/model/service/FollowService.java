@@ -15,6 +15,7 @@ import edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.IsFollowe
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.PagedObserver;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.SimpleNotificationObserver;
 import edu.byu.cs.tweeter.client.presenter.MainPresenter;
+import edu.byu.cs.tweeter.client.presenter.PagedPresenter;
 import edu.byu.cs.tweeter.model.domain.User;
 
 public class FollowService {

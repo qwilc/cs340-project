@@ -2,9 +2,9 @@ package edu.byu.cs.tweeter.client.presenter;
 
 import edu.byu.cs.tweeter.model.domain.User;
 
-public class SecondaryPresenter extends Presenter {
+public class FragmentPresenter extends Presenter {
 
-    public SecondaryPresenter(SecondaryView view) {
+    public FragmentPresenter(SecondaryView view) {
         super(view);
     }
 

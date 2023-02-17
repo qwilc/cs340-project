@@ -1,6 +1,6 @@
 package edu.byu.cs.tweeter.client.presenter;
 
-public class AuthenticationPresenter extends SecondaryPresenter {
+public class AuthenticationPresenter extends FragmentPresenter {
     public AuthenticationPresenter(AuthenticationView view) {
         super(view);
     }

@@ -194,7 +194,7 @@ public class MainPresenter {
 
     }
 
-    public class FollowObserver implements FollowService.FollowObserver, FollowService.UnfollowObserver {
+    public class FollowObserver implements SimpleNotificationObserver {
         @Override
         public void handleSuccess() {
             followService.updateFollowingAndFollowers(selectedUser, new GetCountObserver());
@@ -215,7 +215,7 @@ public class MainPresenter {
         }
     }
 
-    public class UnfollowObserver implements FollowService.UnfollowObserver {
+    public class UnfollowObserver implements SimpleNotificationObserver {
         @Override
         public void handleSuccess() {
             followService.updateFollowingAndFollowers(selectedUser, new GetCountObserver());

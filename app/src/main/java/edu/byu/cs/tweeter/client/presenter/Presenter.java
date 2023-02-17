@@ -29,12 +29,12 @@ public abstract class Presenter {
 
         @Override
         public void handleFailure(String message) {
-            view.displayMessage(getPrefix() + message);
+            view.displayMessage(getPrefix() + " " + message);
         }
 
         @Override
         public void handleException(Exception ex) {
-            view.displayMessage(getPrefix() + "due to exception: " + ex.getMessage());
+            view.displayMessage(getPrefix() + " due to exception: " + ex.getMessage());
         }
 
         public abstract String getPrefix();

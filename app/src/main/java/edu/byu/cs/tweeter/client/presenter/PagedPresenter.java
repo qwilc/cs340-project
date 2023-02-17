@@ -57,6 +57,10 @@ public abstract class PagedPresenter<T> extends FragmentPresenter {
         }
     }
 
+    public void getUser(String userAlias) {
+        getUserService().getUser(userAlias, new GetUserObserver());
+    }
+
     public abstract void callService();
 
     public class PagedObserver extends Observer implements edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.PagedObserver<T> {
@@ -95,7 +99,7 @@ public abstract class PagedPresenter<T> extends FragmentPresenter {
         @Override
         public void handleSuccess(User user) {
             ((PagedView<T>)getView()).startUserActivity(user);
-        } //TODO: This could be a template method in FragmentPresenter
+        } //TODO: Could handleSuccess be a template method?
 
         @Override
         public String getPrefix() {

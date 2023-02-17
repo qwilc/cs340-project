@@ -9,110 +9,22 @@ import edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.UserObser
 import edu.byu.cs.tweeter.model.domain.Status;
 import edu.byu.cs.tweeter.model.domain.User;
 
-public class GetFeedPresenter {
+public class GetFeedPresenter extends StatusPagePresenter {
 
-    private static final int PAGE_SIZE = 10;
-
-    public interface View {
-
-        void displayMessage(String message);
-
-        void setLoadingFooter(boolean value);
-
-        void addMoreItems(List<Status> statuses);
-
-        void startUserActivity(User user);
+    public GetFeedPresenter(PagedView<Status> view, User user) {
+        super(view, user);
     }
 
-    private View view;
-
-    private UserService userService;
-    private StatusService statusService;
-
-    private User user;
-    private Status lastStatus;
-
-    private boolean hasMorePages;
-    private boolean isLoading = false;
-
-    public boolean hasMorePages() {
-        return hasMorePages;
+    @Override
+    public void callService() {
+        getStatusService().loadMoreItems(getUser(), PAGE_SIZE, getLastItem(), new GetFeedObserver());
     }
 
-    public void setHasMorePages(boolean hasMorePages) {
-        this.hasMorePages = hasMorePages;
-    }
-
-    public boolean isLoading() {
-        return isLoading;
-    }
-
-    public void setLoading(boolean loading) {
-        isLoading = loading;
-    }
-
-    public GetFeedPresenter(View view, User user) {
-        this.view = view;
-        this.user = user;
-        this.statusService = new StatusService();
-        this.userService = new UserService();
-    }
-
-    public void getUser(String alias) {
-        userService.getUser(alias, new GetUserObserver());
-    }
-
-    public void loadMoreItems() {
-        if (!isLoading) {   // This guard is important for avoiding a race condition in the scrolling code.
-            isLoading = true;
-            view.setLoadingFooter(true);
-
-            statusService.loadMoreItems(user, PAGE_SIZE, lastStatus, new GetFeedObserver());
-        }
-    }
-
-    public class GetFeedObserver implements PagedObserver<Status> {
+    public class GetFeedObserver extends PagedPresenter<Status>.PagedObserver {
 
         @Override
-        public void handleSuccess(List<Status> statuses, boolean hasMorePages) {
-            isLoading = false;
-            view.setLoadingFooter(false);
-
-            lastStatus = (statuses.size() > 0) ? statuses.get(statuses.size() - 1) : null;
-            setHasMorePages(hasMorePages);
-            view.addMoreItems(statuses);
-        }
-
-        @Override
-        public void handleFailure(String message) {
-            isLoading = false;
-            view.setLoadingFooter(false);
-            view.displayMessage(message);
-        }
-
-        @Override
-        public void handleException(Exception ex) {
-            isLoading = false;
-            view.setLoadingFooter(false);
-            view.displayMessage(ex.getMessage());
-        }
-    }
-
-    public class GetUserObserver implements UserObserver {
-
-        @Override
-        public void handleFailure(String message) {
-            view.displayMessage(message);
-        }
-
-        @Override
-        public void handleSuccess(User user) {
-            view.startUserActivity(user);
-        }
-
-        @Override
-        public void handleException(Exception ex) {
-            view.displayMessage(ex.getMessage());
+        public String getPrefix() {
+            return "Failed to get feed";
         }
     }
 }

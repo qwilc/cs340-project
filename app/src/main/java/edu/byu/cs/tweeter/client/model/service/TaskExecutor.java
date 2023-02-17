@@ -5,8 +5,8 @@ import java.util.concurrent.Executors;
 
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.BackgroundTask;
 
-public class TaskExecutor { //TODO: Should this be static?
-    public static void executeTask(BackgroundTask task) {
+public class TaskExecutor {
+    public static void executeTask(BackgroundTask task) { //TODO: Should this be static?
         ExecutorService executor = Executors.newSingleThreadExecutor();
         executor.execute(task);
     }

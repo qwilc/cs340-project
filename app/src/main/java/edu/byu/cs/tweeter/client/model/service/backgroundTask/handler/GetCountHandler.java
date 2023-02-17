@@ -3,7 +3,6 @@ package edu.byu.cs.tweeter.client.model.service.backgroundTask.handler;
 import android.os.Bundle;
 
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.GetCountTask;
-import edu.byu.cs.tweeter.client.model.service.backgroundTask.GetFollowersCountTask;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.GetCountObserver;
 
 public class GetCountHandler extends BackgroundTaskHandler<GetCountObserver> {

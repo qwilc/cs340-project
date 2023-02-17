@@ -20,7 +20,6 @@ public class LoginPresenter extends AuthenticationPresenter {
     }
 
     public class LoginObserver extends AuthenticationObserver implements AuthenticationServiceObserver {
-
         @Override
         public String getPrefix() {
             return "Failed to login";

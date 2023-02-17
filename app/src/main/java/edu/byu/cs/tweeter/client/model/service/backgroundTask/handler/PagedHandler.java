@@ -4,10 +4,8 @@ import android.os.Bundle;
 
 import java.util.List;
 
-import edu.byu.cs.tweeter.client.model.service.backgroundTask.GetFollowingTask;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.PagedTask;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.PagedObserver;
-import edu.byu.cs.tweeter.model.domain.User;
 
 public class PagedHandler<T> extends BackgroundTaskHandler<PagedObserver<T>> {
 

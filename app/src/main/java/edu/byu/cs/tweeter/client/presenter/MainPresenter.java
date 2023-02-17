@@ -8,9 +8,7 @@ import java.util.List;
 import edu.byu.cs.tweeter.client.cache.Cache;
 import edu.byu.cs.tweeter.client.model.service.FollowService;
 import edu.byu.cs.tweeter.client.model.service.StatusService;
-import edu.byu.cs.tweeter.client.model.service.UserService;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.GetCountObserver;
-import edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.IsFollowerObserverInterface;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.SimpleNotificationObserver;
 import edu.byu.cs.tweeter.model.domain.Status;
 import edu.byu.cs.tweeter.model.domain.User;
@@ -93,11 +91,11 @@ public class MainPresenter extends Presenter {
             statusService.postStatus(newStatus, new PostStatusObserver());
         } catch (Exception ex) {
             Log.e(tag, ex.getMessage(), ex);
-            ((MainView)getView()).displayMessage("Failed to post the status because of exception: " + ex.getMessage());
+            getView().displayMessage("Failed to post the status because of exception: " + ex.getMessage());
         }
     }
 
-    public class IsFollowerObserver extends Observer implements IsFollowerObserverInterface {
+    public class IsFollowerObserver extends Observer implements edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.IsFollowerObserver {
         @Override
         public void handleSuccess (boolean isFollower) {
             ((MainView)getView()).displayFollowButton(isFollower);
@@ -133,45 +131,45 @@ public class MainPresenter extends Presenter {
         }
     }
 
-    public class FollowObserver implements SimpleNotificationObserver {
+    //TODO: This is probably not the way
+    public abstract class FollowButtonObserver extends Observer implements SimpleNotificationObserver {
         @Override
         public void handleSuccess() {
             followService.updateFollowingAndFollowers(selectedUser, new GetFollowerCountObserver(), new GetFolloweeCountObserver());
-            ((MainView)getView()).updateFollowButton(false);
-            ((MainView)getView()).setFollowButtonEnabled(true);
-        }
-
-        @Override
-        public void handleFailure(String message) {
-            ((MainView)getView()).displayMessage(message);
-            ((MainView)getView()).setFollowButtonEnabled(true);
-        }
-
-        @Override
-        public void handleException(Exception ex) {
-            ((MainView)getView()).displayMessage("Failed to follow because of exception: " + ex.getMessage());
-            ((MainView)getView()).setFollowButtonEnabled(true);
-        }
-    }
-
-    public class UnfollowObserver extends Observer implements SimpleNotificationObserver {
-        @Override
-        public void handleSuccess() {
-            followService.updateFollowingAndFollowers(selectedUser, new GetFollowerCountObserver(), new GetFolloweeCountObserver());
-            ((MainView)getView()).updateFollowButton(true);
             ((MainView)getView()).setFollowButtonEnabled(true);
         }
 
         @Override
         public void handleFailure(String message) {
             super.handleFailure(message);
-            ((MainView)getView()).setFollowButtonEnabled(true); // TODO: Make this a template or something?
+            ((MainView)getView()).setFollowButtonEnabled(true);
         }
 
         @Override
         public void handleException(Exception ex) {
             super.handleException(ex);
             ((MainView)getView()).setFollowButtonEnabled(true);
+        }
+    }
+
+    public class FollowObserver extends FollowButtonObserver implements SimpleNotificationObserver {
+        @Override
+        public void handleSuccess() {
+            super.handleSuccess();
+            ((MainView)getView()).updateFollowButton(false);
+        }
+
+        @Override
+        public String getPrefix() {
+            return "Failed to follow";
+        }
+    }
+
+    public class UnfollowObserver extends FollowButtonObserver implements SimpleNotificationObserver {
+        @Override
+        public void handleSuccess() {
+            super.handleSuccess();
+            ((MainView)getView()).updateFollowButton(true);
         }
 
         @Override
@@ -198,7 +196,7 @@ public class MainPresenter extends Presenter {
 
         @Override
         public void handleSuccess() {
-            ((MainView)getView()).displayMessage("Successfully Posted!");
+            getView().displayMessage("Successfully Posted!");
             ((MainView)getView()).setPostingMessage(false);
         }
 

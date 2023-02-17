@@ -17,6 +17,7 @@ public abstract class PagedPresenter<T> extends FragmentPresenter {
 
     public PagedPresenter(PagedView<T> view, User user) {
         super(view);
+        this.user = user;
     }
 
     private User user;
@@ -88,18 +89,13 @@ public abstract class PagedPresenter<T> extends FragmentPresenter {
             ((PagedView<T>)getView()).setLoadingFooter(false);
             super.handleException(ex);
         }
-
-//        @Override
-//        public String getPrefix() {
-//            return "Failed to get page";
-//        }
     }
 
     public class GetUserObserver extends Observer implements UserObserver {
         @Override
         public void handleSuccess(User user) {
             ((PagedView<T>)getView()).startUserActivity(user);
-        } //TODO: Could handleSuccess be a template method?
+        }
 
         @Override
         public String getPrefix() {

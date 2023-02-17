@@ -11,11 +11,10 @@ import edu.byu.cs.tweeter.client.model.service.backgroundTask.handler.GetCountHa
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.handler.IsFollowerHandler;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.handler.PagedHandler;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.handler.SimpleHandler;
-import edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.IsFollowerObserverInterface;
+import edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.IsFollowerObserver;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.PagedObserver;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.SimpleNotificationObserver;
 import edu.byu.cs.tweeter.client.presenter.MainPresenter;
-import edu.byu.cs.tweeter.client.presenter.PagedPresenter;
 import edu.byu.cs.tweeter.model.domain.User;
 
 public class FollowService {
@@ -27,9 +26,7 @@ public class FollowService {
     }
 
     public void updateFollowingAndFollowers(User user, MainPresenter.GetFollowerCountObserver followerObserver, MainPresenter.GetFolloweeCountObserver followeeObserver) {
-        // Get count of most recently selected user's followers.
         getFollowersCount(user, followerObserver);
-        // Get count of most recently selected user's followees (who they are following)
         getFollowingCount(user, followeeObserver);
 
     }
@@ -46,7 +43,7 @@ public class FollowService {
         TaskExecutor.executeTask(followingCountTask);
     }
 
-    public void isFollower(User selectedUser, IsFollowerObserverInterface observer) {
+    public void isFollower(User selectedUser, IsFollowerObserver observer) {
         IsFollowerTask isFollowerTask = new IsFollowerTask(Cache.getInstance().getCurrUserAuthToken(),
                 Cache.getInstance().getCurrUser(), selectedUser, new IsFollowerHandler(observer));
         TaskExecutor.executeTask(isFollowerTask);

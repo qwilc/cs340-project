@@ -38,7 +38,7 @@ public class AuthenticationPresenter extends FragmentPresenter {
 
             ((AuthenticationView)getView()).setAuthenticationMessage(false);
 
-            ((AuthenticationView)getView()).displayMessage("Hello " + user.getName());
+            getView().displayMessage("Hello " + user.getName());
             try {
                 ((AuthenticationView)getView()).startUserActivity(user);
 

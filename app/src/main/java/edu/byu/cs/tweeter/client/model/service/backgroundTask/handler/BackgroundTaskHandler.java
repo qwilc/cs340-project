@@ -7,12 +7,12 @@ import android.os.Message;
 
 import androidx.annotation.NonNull;
 
-import edu.byu.cs.tweeter.client.model.service.backgroundTask.FollowTask;
+import edu.byu.cs.tweeter.client.model.service.backgroundTask.BackgroundTask;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.ServiceObserver;
 
 public abstract class BackgroundTaskHandler<T extends ServiceObserver> extends Handler {
 
-    private T observer;
+    private final T observer;
 
     public BackgroundTaskHandler(T observer) {
         super(Looper.getMainLooper());
@@ -20,14 +20,14 @@ public abstract class BackgroundTaskHandler<T extends ServiceObserver> extends H
     }
 
     public void handleMessage(@NonNull Message msg) {
-        boolean success = msg.getData().getBoolean(FollowTask.SUCCESS_KEY);
+        boolean success = msg.getData().getBoolean(BackgroundTask.SUCCESS_KEY);
         if (success) {
             handleSuccess(msg.getData(), observer);
-        } else if (msg.getData().containsKey(FollowTask.MESSAGE_KEY)) {
-            String message = msg.getData().getString(FollowTask.MESSAGE_KEY);
+        } else if (msg.getData().containsKey(BackgroundTask.MESSAGE_KEY)) {
+            String message = msg.getData().getString(BackgroundTask.MESSAGE_KEY);
             observer.handleFailure(message);
-        } else if (msg.getData().containsKey(FollowTask.EXCEPTION_KEY)) {
-            Exception ex = (Exception) msg.getData().getSerializable(FollowTask.EXCEPTION_KEY);
+        } else if (msg.getData().containsKey(BackgroundTask.EXCEPTION_KEY)) {
+            Exception ex = (Exception) msg.getData().getSerializable(BackgroundTask.EXCEPTION_KEY);
             observer.handleException(ex);
         }
     }

@@ -1,5 +1,6 @@
 package edu.byu.cs.tweeter.client.model.service.backgroundTask.handler;
 
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -8,27 +9,18 @@ import androidx.annotation.NonNull;
 
 import edu.byu.cs.tweeter.client.model.service.StatusService;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.PostStatusTask;
+import edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.SimpleNotificationObserver;
 
-public class PostStatusHandler extends Handler {
+public class PostStatusHandler extends BackgroundTaskHandler<SimpleNotificationObserver> {
 
     private StatusService.PostStatusObserver observer;
 
-    public PostStatusHandler(StatusService.PostStatusObserver observer) {
-        super(Looper.getMainLooper());
-        this.observer = observer;
+    public PostStatusHandler(SimpleNotificationObserver observer) {
+        super(observer);
     }
 
     @Override
-    public void handleMessage(@NonNull Message msg) {
-        boolean success = msg.getData().getBoolean(PostStatusTask.SUCCESS_KEY);
-        if (success) {
-            observer.handleSuccess();
-        } else if (msg.getData().containsKey(PostStatusTask.MESSAGE_KEY)) {
-            String message = msg.getData().getString(PostStatusTask.MESSAGE_KEY);
-            observer.handleFailure(message);
-        } else if (msg.getData().containsKey(PostStatusTask.EXCEPTION_KEY)) {
-            Exception ex = (Exception) msg.getData().getSerializable(PostStatusTask.EXCEPTION_KEY);
-            observer.handleException(ex);
-        }
+    protected void handleSuccess(Bundle data, SimpleNotificationObserver observer) {
+        observer.handleSuccess();
     }
 }

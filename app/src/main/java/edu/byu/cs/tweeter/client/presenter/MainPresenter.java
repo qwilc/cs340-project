@@ -255,7 +255,7 @@ public class MainPresenter {
         }
     }
 
-    public class PostStatusObserver implements StatusService.PostStatusObserver {
+    public class PostStatusObserver implements SimpleNotificationObserver {
 
         @Override
         public void handleSuccess() {

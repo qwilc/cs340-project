@@ -75,11 +75,6 @@ public class RegisterPresenter {
     public class RegisterObserver implements UserService.RegisterObserver {
 
         @Override
-        public void displayMessage(String s) {
-            view.displayMessage(s);
-        }
-
-        @Override
         public void handleSuccess(User registeredUser) {
 
             view.setRegisterMessage(false);
@@ -92,6 +87,16 @@ public class RegisterPresenter {
             } catch (Exception e) {
                 System.out.println(e.getMessage());
             }
+        }
+
+        @Override
+        public void handleFailure(String message) {
+            view.displayMessage(message);
+        }
+
+        @Override
+        public void handleException(Exception ex) {
+            view.displayMessage(ex.getMessage());
         }
     }
 

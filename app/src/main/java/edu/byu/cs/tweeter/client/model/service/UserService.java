@@ -32,9 +32,9 @@ public class UserService {
     }
 
     public interface RegisterObserver {
-        void displayMessage(String s);
-
         void handleSuccess(User registeredUser);
+        void handleFailure(String message);
+        void handleException(Exception ex);
     }
 
     public interface LogoutObserver {

@@ -35,10 +35,10 @@ public class RegisterHandler extends Handler {
 
         } else if (msg.getData().containsKey(RegisterTask.MESSAGE_KEY)) {
             String message = msg.getData().getString(RegisterTask.MESSAGE_KEY);
-            observer.displayMessage("Failed to register: " + message);
+            observer.handleFailure(message);
         } else if (msg.getData().containsKey(RegisterTask.EXCEPTION_KEY)) {
             Exception ex = (Exception) msg.getData().getSerializable(RegisterTask.EXCEPTION_KEY);
-            observer.displayMessage("Failed to register because of exception: " + ex.getMessage());
+            observer.handleException(ex);
         }
     }
 }

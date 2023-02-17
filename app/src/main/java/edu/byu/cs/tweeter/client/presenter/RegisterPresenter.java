@@ -13,7 +13,6 @@ public class RegisterPresenter extends AuthenticationPresenter {
 
         String getEncodedImage();
 
-
     }
 
     public RegisterPresenter(RegisterView view) {
@@ -43,29 +42,15 @@ public class RegisterPresenter extends AuthenticationPresenter {
         if (lastName.length() == 0) {
             throw new IllegalArgumentException("Last Name cannot be empty.");
         }
-        if (alias.length() == 0) {
-            throw new IllegalArgumentException("Alias cannot be empty.");
-        }
-        if (alias.charAt(0) != '@') {
-            throw new IllegalArgumentException("Alias must begin with @.");
-        }
-        if (alias.length() < 2) {
-            throw new IllegalArgumentException("Alias must contain 1 or more characters after the @.");
-        }
-        if (password.length() == 0) {
-            throw new IllegalArgumentException("Password cannot be empty.");
-        }
+        validateLoginInfo(alias, password);
 
         ((RegisterView)getView()).validateImage();
     }
     
     public class RegisterObserver extends AuthenticationObserver implements AuthenticationServiceObserver {
-
         @Override
         public String getPrefix() {
             return "Failed to register";
         }
     }
-
-
 }

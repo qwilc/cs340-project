@@ -4,36 +4,18 @@ import edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.Authentic
 
 public class LoginPresenter extends AuthenticationPresenter {
 
-
-    public interface LoginView extends AuthenticationView {
-
-    }
-
-    public LoginPresenter(LoginView view) {
+    public LoginPresenter(AuthenticationView view) {
         super(view);
     }
 
     public void tryLogin(String alias, String password) {
         try {
-            validateLogin(alias, password);
-            ((LoginView)getView()).setErrorView(null);
+            validateLoginInfo(alias, password);
+            ((AuthenticationView)getView()).setErrorView(null);
             getUserService().login(alias, password, new LoginObserver());
 
         } catch (Exception e) {
-            ((LoginView)getView()).setErrorView(e.getMessage());
-        }
-    }
-
-
-    public void validateLogin(String alias, String password) {
-        if (alias.length() > 0 && alias.charAt(0) != '@') {
-            throw new IllegalArgumentException("Alias must begin with @.");
-        }
-        if (alias.length() < 2) {
-            throw new IllegalArgumentException("Alias must contain 1 or more characters after the @.");
-        }
-        if (password.length() == 0) {
-            throw new IllegalArgumentException("Password cannot be empty.");
+            ((AuthenticationView)getView()).setErrorView(e.getMessage());
         }
     }
 

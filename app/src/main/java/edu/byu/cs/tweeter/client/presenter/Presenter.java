@@ -8,7 +8,6 @@ public abstract class Presenter {
         void displayMessage(String message);
     }
 
-
     private View view;
     private UserService userService;
 

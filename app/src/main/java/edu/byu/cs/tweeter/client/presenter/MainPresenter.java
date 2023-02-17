@@ -77,7 +77,6 @@ public class MainPresenter extends Presenter {
 
     public void follow() {
         followService.follow(selectedUser, new FollowObserver());
-
     }
 
     public void logout() {
@@ -95,63 +94,6 @@ public class MainPresenter extends Presenter {
         } catch (Exception ex) {
             Log.e(tag, ex.getMessage(), ex);
             ((MainView)getView()).displayMessage("Failed to post the status because of exception: " + ex.getMessage());
-        }
-    }
-
-    public List<String> parseURLs(String post) {
-        List<String> containedUrls = new ArrayList<>();
-        for (String word : post.split("\\s")) {
-            if (word.startsWith("http://") || word.startsWith("https://")) {
-
-                int index = findUrlEndIndex(word);
-
-                word = word.substring(0, index);
-
-                containedUrls.add(word);
-            }
-        }
-
-        return containedUrls;
-    }
-
-    public List<String> parseMentions(String post) {
-        List<String> containedMentions = new ArrayList<>();
-
-        for (String word : post.split("\\s")) {
-            if (word.startsWith("@")) {
-                word = word.replaceAll("[^a-zA-Z0-9]", "");
-                word = "@".concat(word);
-
-                containedMentions.add(word);
-            }
-        }
-
-        return containedMentions;
-    }
-
-    public int findUrlEndIndex(String word) {
-        if (word.contains(".com")) {
-            int index = word.indexOf(".com");
-            index += 4;
-            return index;
-        } else if (word.contains(".org")) {
-            int index = word.indexOf(".org");
-            index += 4;
-            return index;
-        } else if (word.contains(".edu")) {
-            int index = word.indexOf(".edu");
-            index += 4;
-            return index;
-        } else if (word.contains(".net")) {
-            int index = word.indexOf(".net");
-            index += 4;
-            return index;
-        } else if (word.contains(".mil")) {
-            int index = word.indexOf(".mil");
-            index += 4;
-            return index;
-        } else {
-            return word.length();
         }
     }
 
@@ -212,7 +154,7 @@ public class MainPresenter extends Presenter {
         }
     }
 
-    public class UnfollowObserver implements SimpleNotificationObserver {
+    public class UnfollowObserver extends Observer implements SimpleNotificationObserver {
         @Override
         public void handleSuccess() {
             followService.updateFollowingAndFollowers(selectedUser, new GetFollowerCountObserver(), new GetFolloweeCountObserver());
@@ -222,14 +164,19 @@ public class MainPresenter extends Presenter {
 
         @Override
         public void handleFailure(String message) {
-            ((MainView)getView()).displayMessage(message);
-            ((MainView)getView()).setFollowButtonEnabled(true);
+            super.handleFailure(message);
+            ((MainView)getView()).setFollowButtonEnabled(true); // TODO: Make this a template or something?
         }
 
         @Override
         public void handleException(Exception ex) {
-            ((MainView)getView()).displayMessage("Failed to unfollow because of exception: " + ex.getMessage());
+            super.handleException(ex);
             ((MainView)getView()).setFollowButtonEnabled(true);
+        }
+
+        @Override
+        public String getPrefix() {
+            return "Failed to unfollow";
         }
     }
 
@@ -258,6 +205,63 @@ public class MainPresenter extends Presenter {
         @Override
         public String getPrefix() {
             return "Failed to post status";
+        }
+    }
+
+    public List<String> parseURLs(String post) {
+        List<String> containedUrls = new ArrayList<>();
+        for (String word : post.split("\\s")) {
+            if (word.startsWith("http://") || word.startsWith("https://")) {
+
+                int index = findUrlEndIndex(word);
+
+                word = word.substring(0, index);
+
+                containedUrls.add(word);
+            }
+        }
+
+        return containedUrls;
+    }
+
+    public List<String> parseMentions(String post) {
+        List<String> containedMentions = new ArrayList<>();
+
+        for (String word : post.split("\\s")) {
+            if (word.startsWith("@")) {
+                word = word.replaceAll("[^a-zA-Z0-9]", "");
+                word = "@".concat(word);
+
+                containedMentions.add(word);
+            }
+        }
+
+        return containedMentions;
+    }
+
+    public int findUrlEndIndex(String word) {
+        if (word.contains(".com")) {
+            int index = word.indexOf(".com");
+            index += 4;
+            return index;
+        } else if (word.contains(".org")) {
+            int index = word.indexOf(".org");
+            index += 4;
+            return index;
+        } else if (word.contains(".edu")) {
+            int index = word.indexOf(".edu");
+            index += 4;
+            return index;
+        } else if (word.contains(".net")) {
+            int index = word.indexOf(".net");
+            index += 4;
+            return index;
+        } else if (word.contains(".mil")) {
+            int index = word.indexOf(".mil");
+            index += 4;
+            return index;
+        } else {
+            return word.length();
         }
     }
 }

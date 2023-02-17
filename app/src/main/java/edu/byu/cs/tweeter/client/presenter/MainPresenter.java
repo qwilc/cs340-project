@@ -73,7 +73,7 @@ public class MainPresenter {
     }
 
     public void unfollow() {
-        followService.unfollow(selectedUser, new FollowObserver());
+        followService.unfollow(selectedUser, new UnfollowObserver());
 
     }
 
@@ -189,23 +189,43 @@ public class MainPresenter {
 
     public class FollowObserver implements FollowService.FollowObserver, FollowService.UnfollowObserver {
         @Override
-        public void displayMessage(String message) {
-            view.displayMessage(message);
-        }
-
-        @Override
-        public void setFollowButtonEnabled(boolean b) {
-            view.setFollowButtonEnabled(b);
-        }
-
-        @Override
-        public void updateFollowingAndFollowers() {
+        public void handleSuccess() {
             followService.updateFollowingAndFollowers(selectedUser, new GetCountObserver());
+            view.updateFollowButton(false);
+            view.setFollowButtonEnabled(true);
         }
 
         @Override
-        public void updateFollowButton(boolean b) {
-            view.updateFollowButton(b);
+        public void handleFailure(String message) {
+            view.displayMessage(message);
+            view.setFollowButtonEnabled(true);
+        }
+
+        @Override
+        public void handleException(Exception ex) {
+            view.displayMessage("Failed to follow because of exception: " + ex.getMessage());
+            view.setFollowButtonEnabled(true);
+        }
+    }
+
+    public class UnfollowObserver implements FollowService.UnfollowObserver {
+        @Override
+        public void handleSuccess() {
+            followService.updateFollowingAndFollowers(selectedUser, new GetCountObserver());
+            view.updateFollowButton(true);
+            view.setFollowButtonEnabled(true);
+        }
+
+        @Override
+        public void handleFailure(String message) {
+            view.displayMessage(message);
+            view.setFollowButtonEnabled(true);
+        }
+
+        @Override
+        public void handleException(Exception ex) {
+            view.displayMessage("Failed to unfollow because of exception: " + ex.getMessage());
+            view.setFollowButtonEnabled(true);
         }
     }
 

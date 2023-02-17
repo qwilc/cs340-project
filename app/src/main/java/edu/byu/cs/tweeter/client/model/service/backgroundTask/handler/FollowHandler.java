@@ -22,16 +22,13 @@ public class FollowHandler extends Handler {
     public void handleMessage(@NonNull Message msg) {
         boolean success = msg.getData().getBoolean(FollowTask.SUCCESS_KEY);
         if (success) {
-            observer.updateFollowingAndFollowers();
-            observer.updateFollowButton(false);
+            observer.handleSuccess();
         } else if (msg.getData().containsKey(FollowTask.MESSAGE_KEY)) {
             String message = msg.getData().getString(FollowTask.MESSAGE_KEY);
-            observer.displayMessage("Failed to follow: " + message);
+            observer.handleFailure(message);
         } else if (msg.getData().containsKey(FollowTask.EXCEPTION_KEY)) {
             Exception ex = (Exception) msg.getData().getSerializable(FollowTask.EXCEPTION_KEY);
-            observer.displayMessage("Failed to follow because of exception: " + ex.getMessage());
+            observer.handleException(ex);
         }
-
-        observer.setFollowButtonEnabled(true);
     }
 }

@@ -49,23 +49,15 @@ public class FollowService {
     }
 
     public interface FollowObserver {
-        void displayMessage(String message);
-
-        void updateFollowButton(boolean b);
-
-        void setFollowButtonEnabled(boolean b);
-
-        void updateFollowingAndFollowers();
+        void handleSuccess();
+        void handleFailure(String message);
+        void handleException(Exception ex);
     }
 
     public interface UnfollowObserver {
-        void displayMessage(String message);
-
-        void updateFollowButton(boolean b);
-
-        void setFollowButtonEnabled(boolean b);
-
-        void updateFollowingAndFollowers();
+        void handleSuccess();
+        void handleFailure(String message);
+        void handleException(Exception ex);
     }
 
     public void loadMoreItems(User user, int pageSize, User lastFollowee, GetFollowObserver observer) {
@@ -117,7 +109,7 @@ public class FollowService {
         executor.execute(followTask);
     }
 
-    public void unfollow(User selectedUser, MainPresenter.FollowObserver observer) {
+    public void unfollow(User selectedUser, MainPresenter.UnfollowObserver observer) {
         UnfollowTask unfollowTask = new UnfollowTask(Cache.getInstance().getCurrUserAuthToken(),
                 selectedUser, new UnfollowHandler(observer));
         ExecutorService executor = Executors.newSingleThreadExecutor();

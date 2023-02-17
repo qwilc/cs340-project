@@ -71,21 +71,21 @@ public class GetFollowingPresenter {
     public class GetFollowObserver implements FollowService.GetFollowObserver {
 
         @Override
-        public void displayError(String message) {
+        public void handleFailure(String message) {
             isLoading = false;
             view.setLoadingFooter(false);
             view.displayMessage(message);
         }
 
         @Override
-        public void displayException(Exception ex) {
+        public void handleException(Exception ex) {
             isLoading = false;
             view.setLoadingFooter(false);
             view.displayMessage("Failed to get following because of exception: " + ex.getMessage());
         }
 
         @Override
-        public void addItems(List<User> items, boolean hasMorePages) {
+        public void handleSuccess(List<User> items, boolean hasMorePages) {
             isLoading = false;
             view.setLoadingFooter(false);
 

@@ -67,28 +67,29 @@ public class GetFollowersPresenter {
     }
     
     public class GetFollowersObserver implements FollowService.GetFollowObserver {
-        @Override
-        public void displayError(String message) {
-            isLoading = false;
-            view.setLoadingFooter(false);
-            view.displayMessage(message);
-        }
 
         @Override
-        public void displayException(Exception ex) {
-            isLoading = false;
-            view.setLoadingFooter(false);
-            view.displayMessage("Failed to get followers because of exception: " + ex.getMessage());
-        }
-
-        @Override
-        public void addItems(List<User> items, boolean hasMorePages) {
+        public void handleSuccess(List<User> items, boolean hasMorePages) {
             isLoading = false;
             view.setLoadingFooter(false);
 
             lastFollower = (items.size() > 0) ? items.get(items.size() - 1) : null;
             setHasMorePages(hasMorePages);
             view.addMoreItems(items);
+        }
+
+        @Override
+        public void handleFailure(String message) {
+            isLoading = false;
+            view.setLoadingFooter(false);
+            view.displayMessage(message);
+        }
+
+        @Override
+        public void handleException(Exception ex) {
+            isLoading = false;
+            view.setLoadingFooter(false);
+            view.displayMessage("Failed to get followers because of exception: " + ex.getMessage());
         }
     }
 

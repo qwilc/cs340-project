@@ -25,12 +25,11 @@ import edu.byu.cs.tweeter.model.domain.User;
 public class FollowService {
 
     public interface GetFollowObserver {
+        void handleSuccess(List<User> items, boolean hasMorePages);
 
-        void displayError(String message);
+        void handleFailure(String message);
 
-        void displayException(Exception ex);
-
-        void addItems(List<User> items, boolean hasMorePages);
+        void handleException(Exception ex);
     }
 
     public interface GetCountObserver {

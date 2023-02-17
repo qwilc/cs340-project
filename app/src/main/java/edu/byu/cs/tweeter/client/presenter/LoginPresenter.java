@@ -2,6 +2,7 @@ package edu.byu.cs.tweeter.client.presenter;
 
 import edu.byu.cs.tweeter.client.cache.Cache;
 import edu.byu.cs.tweeter.client.model.service.UserService;
+import edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.AuthenticationObserver;
 import edu.byu.cs.tweeter.model.domain.AuthToken;
 import edu.byu.cs.tweeter.model.domain.User;
 
@@ -29,7 +30,7 @@ public class LoginPresenter {
 
     public void tryLogin(String alias, String password) {
         try {
-            validateLogin(alias, password); // TODO Does validation need to be pushed to service?
+            validateLogin(alias, password);
             view.setErrorView(null);
             userService.login(alias, password, new LoginObserver());
 
@@ -51,7 +52,7 @@ public class LoginPresenter {
         }
     }
 
-    public class LoginObserver implements UserService.LoginObserver {
+    public class LoginObserver implements AuthenticationObserver {
 
         @Override
         public void handleSuccess(User loggedInUser, AuthToken authToken) {

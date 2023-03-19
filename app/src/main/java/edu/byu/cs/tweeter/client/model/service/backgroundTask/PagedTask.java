@@ -9,6 +9,7 @@ import java.util.List;
 
 import edu.byu.cs.tweeter.model.domain.AuthToken;
 import edu.byu.cs.tweeter.model.domain.User;
+import edu.byu.cs.tweeter.model.net.TweeterRemoteException;
 import edu.byu.cs.tweeter.util.Pair;
 
 public abstract class PagedTask<T> extends AuthenticatedTask {
@@ -64,7 +65,7 @@ public abstract class PagedTask<T> extends AuthenticatedTask {
     }
 
     @Override
-    protected final void runTask() throws IOException {
+    protected /*final*/ void runTask() throws IOException, TweeterRemoteException {
         Pair<List<T>, Boolean> pageOfItems = getItems();
 
         items = pageOfItems.getFirst();
@@ -84,5 +85,17 @@ public abstract class PagedTask<T> extends AuthenticatedTask {
     protected final void loadSuccessBundle(Bundle msgBundle) {
         msgBundle.putSerializable(ITEMS_KEY, (Serializable) items);
         msgBundle.putBoolean(MORE_PAGES_KEY, hasMorePages);
+    }
+
+    public void setItems(List<T> items) {
+        this.items = items;
+    }
+
+    public boolean isHasMorePages() {
+        return hasMorePages;
+    }
+
+    public void setHasMorePages(boolean hasMorePages) {
+        this.hasMorePages = hasMorePages;
     }
 }

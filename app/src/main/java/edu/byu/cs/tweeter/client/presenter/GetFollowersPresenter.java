@@ -10,7 +10,7 @@ public class GetFollowersPresenter extends UserPagePresenter {
 
     @Override
     public void callService() {
-        getFollowService().loadMoreItems(getUser(), PAGE_SIZE, getLastItem(), new GetFollowersObserver());
+        getFollowService().loadMoreFollowers(getUser(), PAGE_SIZE, getLastItem(), new GetFollowersObserver());
     }
 
     public class GetFollowersObserver extends PagedPresenter<User>.PagedObserver {

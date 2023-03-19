@@ -3,6 +3,7 @@ package edu.byu.cs.tweeter.client.model.service;
 import edu.byu.cs.tweeter.client.cache.Cache;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.FollowTask;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.GetFollowersCountTask;
+import edu.byu.cs.tweeter.client.model.service.backgroundTask.GetFollowersTask;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.GetFollowingCountTask;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.GetFollowingTask;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.IsFollowerTask;
@@ -19,10 +20,18 @@ import edu.byu.cs.tweeter.model.domain.User;
 
 public class FollowService {
 
-    public void loadMoreItems(User user, int pageSize, User lastFollowee, PagedObserver<User> observer) {
+    public static final String GET_FOLLOWING_PATH = "/getfollowing";
+
+    public void loadMoreFollowees(User user, int pageSize, User lastFollowee, PagedObserver<User> observer) {
         GetFollowingTask getFollowingTask = new GetFollowingTask(Cache.getInstance().getCurrUserAuthToken(),
                 user, pageSize, lastFollowee, new PagedHandler<>(observer));
         TaskExecutor.executeTask(getFollowingTask);
+    }
+
+    public void loadMoreFollowers(User user, int pageSize, User lastFollower, PagedObserver<User> observer) {
+        GetFollowersTask getFollowersTask = new GetFollowersTask(Cache.getInstance().getCurrUserAuthToken(),
+                user, pageSize, lastFollower, new PagedHandler<>(observer));
+        TaskExecutor.executeTask(getFollowersTask);
     }
 
     public void updateFollowingAndFollowers(User user, MainPresenter.GetFollowerCountObserver followerObserver, MainPresenter.GetFolloweeCountObserver followeeObserver) {

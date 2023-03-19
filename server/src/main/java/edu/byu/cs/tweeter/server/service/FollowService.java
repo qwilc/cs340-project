@@ -1,7 +1,7 @@
 package edu.byu.cs.tweeter.server.service;
 
-import edu.byu.cs.tweeter.model.net.request.FollowingRequest;
-import edu.byu.cs.tweeter.model.net.response.FollowingResponse;
+import edu.byu.cs.tweeter.model.net.request.FollowsRequest;
+import edu.byu.cs.tweeter.model.net.response.FollowsResponse;
 import edu.byu.cs.tweeter.server.dao.FollowDAO;
 
 /**
@@ -18,7 +18,7 @@ public class FollowService {
      * @param request contains the data required to fulfill the request.
      * @return the followees.
      */
-    public FollowingResponse getFollowees(FollowingRequest request) {
+    public FollowsResponse getFollowees(FollowsRequest request) {
         if(request.getFollowerAlias() == null) {
             throw new RuntimeException("[Bad Request] Request needs to have a follower alias");
         } else if(request.getLimit() <= 0) {

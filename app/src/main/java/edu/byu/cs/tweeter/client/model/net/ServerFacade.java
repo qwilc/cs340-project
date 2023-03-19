@@ -43,4 +43,9 @@ public class ServerFacade {
             throws IOException, TweeterRemoteException {
         return clientCommunicator.doPost(urlPath, request, null, FollowsResponse.class);
     }
+
+    public FollowsResponse getFollowers(FollowsRequest request, String urlPath)
+            throws IOException, TweeterRemoteException {
+        return clientCommunicator.doPost(urlPath, request, null, FollowsResponse.class);
+    }
 }

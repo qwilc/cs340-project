@@ -5,6 +5,7 @@ import android.os.Handler;
 import java.io.IOException;
 import java.util.List;
 
+import edu.byu.cs.tweeter.client.model.service.FollowService;
 import edu.byu.cs.tweeter.model.domain.AuthToken;
 import edu.byu.cs.tweeter.model.domain.User;
 import edu.byu.cs.tweeter.model.net.TweeterRemoteException;
@@ -24,7 +25,7 @@ public class GetFollowersTask extends PagedUserTask {
 
     @Override
     protected FollowsResponse callServer(FollowsRequest request) throws IOException, TweeterRemoteException {
-        return null;
+        return getServerFacade().getFollowers(request, FollowService.GET_FOLLOWERS_PATH);
     }
 
     @Override

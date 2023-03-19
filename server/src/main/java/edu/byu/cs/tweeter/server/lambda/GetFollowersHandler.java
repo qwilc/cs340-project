@@ -10,7 +10,7 @@ import edu.byu.cs.tweeter.server.service.FollowService;
 /**
  * An AWS lambda function that returns the users a user is following.
  */
-public class GetFollowingHandler implements RequestHandler<FollowsRequest, FollowsResponse> {
+public class GetFollowersHandler implements RequestHandler<FollowsRequest, FollowsResponse> {
 
     /**
      * Returns the users that the user specified in the request is following. Uses information in

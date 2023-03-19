@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import edu.byu.cs.tweeter.model.domain.User;
-import edu.byu.cs.tweeter.model.net.request.FollowingRequest;
-import edu.byu.cs.tweeter.model.net.response.FollowingResponse;
+import edu.byu.cs.tweeter.model.net.request.FollowsRequest;
+import edu.byu.cs.tweeter.model.net.response.FollowsResponse;
 import edu.byu.cs.tweeter.util.FakeData;
 
 /**
@@ -36,7 +36,7 @@ public class FollowDAO {
      *                other information required to satisfy the request.
      * @return the followees.
      */
-    public FollowingResponse getFollowees(FollowingRequest request) {
+    public FollowsResponse getFollowees(FollowsRequest request) {
         // TODO: Generates dummy data. Replace with a real implementation.
         assert request.getLimit() > 0;
         assert request.getFollowerAlias() != null;
@@ -58,7 +58,7 @@ public class FollowDAO {
             }
         }
 
-        return new FollowingResponse(responseFollowees, hasMorePages);
+        return new FollowsResponse(responseFollowees, hasMorePages);
     }
 
     /**

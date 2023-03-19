@@ -43,7 +43,7 @@ public class FollowingRequest {
         return authToken;
     }
 
-    /**
+    /**ing
      * Sets the auth token.
      *
      * @param authToken the auth token.

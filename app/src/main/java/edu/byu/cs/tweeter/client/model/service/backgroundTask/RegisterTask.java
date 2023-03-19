@@ -2,8 +2,13 @@ package edu.byu.cs.tweeter.client.model.service.backgroundTask;
 
 import android.os.Handler;
 
+import java.io.IOException;
+
 import edu.byu.cs.tweeter.model.domain.AuthToken;
 import edu.byu.cs.tweeter.model.domain.User;
+import edu.byu.cs.tweeter.model.net.TweeterRemoteException;
+import edu.byu.cs.tweeter.model.net.request.Request;
+import edu.byu.cs.tweeter.model.net.response.AuthenticationResponse;
 import edu.byu.cs.tweeter.util.Pair;
 
 /**
@@ -32,6 +37,16 @@ public class RegisterTask extends AuthenticateTask {
         this.firstName = firstName;
         this.lastName = lastName;
         this.image = image;
+    }
+
+    @Override
+    protected AuthenticationResponse authenticate(Request request) throws IOException, TweeterRemoteException {
+        return null;
+    }
+
+    @Override
+    protected Request createRequest(String username, String password) {
+        return null;
     }
 
     @Override

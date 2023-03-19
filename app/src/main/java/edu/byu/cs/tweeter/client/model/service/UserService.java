@@ -14,6 +14,8 @@ import edu.byu.cs.tweeter.client.presenter.MainPresenter;
 
 public class UserService {
 
+    public static final String LOGIN_URL_PATH = "/login";
+
     public void getUser(String userAlias, UserObserver observer) {
         GetUserTask getUserTask = new GetUserTask(Cache.getInstance().getCurrUserAuthToken(),
                 userAlias, new GetUserHandler(observer));
@@ -21,7 +23,7 @@ public class UserService {
     }
 
     public void login(String alias, String password, AuthenticationServiceObserver observer) {
-        LoginTask loginTask = new LoginTask(alias, password, new AuthenticationHandler(observer));
+        LoginTask loginTask = getLoginTask(alias, password, observer);
         TaskExecutor.executeTask(loginTask);
     }
 
@@ -34,6 +36,17 @@ public class UserService {
     public void logout(MainPresenter.LogOutObserver observer) {
         LogoutTask logoutTask = new LogoutTask(Cache.getInstance().getCurrUserAuthToken(), new SimpleHandler(observer));
         TaskExecutor.executeTask(logoutTask);
+    }
+
+    /**
+     * Returns an instance of {@link LoginTask}. Allows mocking of the LoginTask class for
+     * testing purposes. All usages of LoginTask should get their instance from this method to
+     * allow for proper mocking.
+     *
+     * @return the instance.
+     */
+    LoginTask getLoginTask(String alias, String password, AuthenticationServiceObserver observer) {
+        return new LoginTask(alias, password, new AuthenticationHandler(observer));
     }
 
 }

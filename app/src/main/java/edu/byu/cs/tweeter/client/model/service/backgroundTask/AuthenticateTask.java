@@ -2,14 +2,20 @@ package edu.byu.cs.tweeter.client.model.service.backgroundTask;
 
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Log;
 
 import java.io.IOException;
 
 import edu.byu.cs.tweeter.model.domain.AuthToken;
 import edu.byu.cs.tweeter.model.domain.User;
+import edu.byu.cs.tweeter.model.net.TweeterRemoteException;
+import edu.byu.cs.tweeter.model.net.request.Request;
+import edu.byu.cs.tweeter.model.net.response.AuthenticationResponse;
 import edu.byu.cs.tweeter.util.Pair;
 
 public abstract class AuthenticateTask extends BackgroundTask {
+
+    private static final String LOG_TAG = "AuthenticationTask";
 
     public static final String USER_KEY = "user";
     public static final String AUTH_TOKEN_KEY = "auth-token";
@@ -37,16 +43,37 @@ public abstract class AuthenticateTask extends BackgroundTask {
 
     @Override
     protected final void runTask()  throws IOException {
-        Pair<User, AuthToken> loginResult = runAuthenticationTask();
+        try {
+            Request request = createRequest(username, password);
+            AuthenticationResponse response = authenticate(request);
 
-        authenticatedUser = loginResult.getFirst();
-        authToken = loginResult.getSecond();
-
-        // Call sendSuccessMessage if successful
-        sendSuccessMessage();
-        // or call sendFailedMessage if not successful
-        // sendFailedMessage()
+            if (response.isSuccess()) {
+                this.authenticatedUser = response.getUser();
+                this.authToken = response.getAuthToken();
+                sendSuccessMessage();
+            }
+            else {
+                sendFailedMessage(response.getMessage());
+            }
+        }
+        catch (Exception ex) {
+            Log.e(LOG_TAG, ex.getMessage(), ex);
+            sendExceptionMessage(ex);
+        }
+//        Pair<User, AuthToken> loginResult = runAuthenticationTask();
+//
+//        authenticatedUser = loginResult.getFirst();
+//        authToken = loginResult.getSecond();
+//
+//        // Call sendSuccessMessage if successful
+//        sendSuccessMessage();
+//        // or call sendFailedMessage if not successful
+//        // sendFailedMessage()
     }
+
+    protected abstract AuthenticationResponse authenticate(Request request) throws IOException, TweeterRemoteException;
+
+    protected abstract Request createRequest(String username, String password);
 
     protected abstract Pair<User, AuthToken> runAuthenticationTask();
 

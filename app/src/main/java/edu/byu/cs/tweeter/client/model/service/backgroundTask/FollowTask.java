@@ -3,10 +3,15 @@ package edu.byu.cs.tweeter.client.model.service.backgroundTask;
 import android.os.Handler;
 import android.util.Log;
 
+import java.io.IOException;
+
 import edu.byu.cs.tweeter.client.model.service.FollowService;
 import edu.byu.cs.tweeter.model.domain.AuthToken;
 import edu.byu.cs.tweeter.model.domain.User;
+import edu.byu.cs.tweeter.model.net.TweeterRemoteException;
 import edu.byu.cs.tweeter.model.net.request.FollowRequest;
+import edu.byu.cs.tweeter.model.net.request.Request;
+import edu.byu.cs.tweeter.model.net.response.Response;
 import edu.byu.cs.tweeter.model.net.response.UpdateFollowResponse;
 
 /**
@@ -26,30 +31,17 @@ public class FollowTask extends AuthenticatedTask {
     }
 
     @Override
-    protected void runTask() {
-        try {
-            FollowRequest request = new FollowRequest(getAuthToken(), followee);
-            UpdateFollowResponse response = getServerFacade().follow(request, FollowService.FOLLOW_PATH);
+    protected void extractResponseData(Response response) {
 
-            if (response.isSuccess()) {
-                sendSuccessMessage();
-            }
-            else {
-                sendFailedMessage(response.getMessage());
-            }
-
-        }
-            catch (Exception ex) {
-            Log.e(LOG_TAG, ex.getMessage(), ex);
-            sendExceptionMessage(ex);
-        }
-//        // We could do this from the presenter, without a task and handler, but we will
-//        // eventually access the database from here when we aren't using dummy data.
-//
-//        // Call sendSuccessMessage if successful
-//        sendSuccessMessage();
-//        // or call sendFailedMessage if not successful
-//        // sendFailedMessage()
     }
 
+    @Override
+    protected Request createRequest() {
+        return new FollowRequest(getAuthToken(), followee);
+    }
+
+    @Override
+    protected Response callServer(Request request) throws IOException, TweeterRemoteException {
+        return getServerFacade().follow((FollowRequest) request, FollowService.FOLLOW_PATH);
+    }
 }

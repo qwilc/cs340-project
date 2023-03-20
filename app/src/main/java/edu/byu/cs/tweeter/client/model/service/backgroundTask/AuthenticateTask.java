@@ -6,13 +6,13 @@ import android.util.Log;
 
 import java.io.IOException;
 
-import edu.byu.cs.tweeter.client.model.service.UserService;
 import edu.byu.cs.tweeter.model.domain.AuthToken;
 import edu.byu.cs.tweeter.model.domain.User;
 import edu.byu.cs.tweeter.model.net.TweeterRemoteException;
 import edu.byu.cs.tweeter.model.net.request.AuthenticationRequest;
 import edu.byu.cs.tweeter.model.net.request.Request;
 import edu.byu.cs.tweeter.model.net.response.AuthenticationResponse;
+import edu.byu.cs.tweeter.model.net.response.Response;
 import edu.byu.cs.tweeter.util.Pair;
 
 public abstract class AuthenticateTask extends BackgroundTask {
@@ -42,42 +42,25 @@ public abstract class AuthenticateTask extends BackgroundTask {
         this.password = password;
     }
 
-
     @Override
-    protected final void runTask()  throws IOException {
-        try {
-            Request request = createRequest(username, password);
-            AuthenticationResponse response = getServerFacade().authenticate((AuthenticationRequest) request, getPath());
-
-            if (response.isSuccess()) {
-                this.authenticatedUser = response.getUser();
-                this.authToken = response.getAuthToken();
-                sendSuccessMessage();
-            }
-            else {
-                sendFailedMessage(response.getMessage());
-            }
-        }
-        catch (Exception ex) {
-            Log.e(LOG_TAG, ex.getMessage(), ex);
-            sendExceptionMessage(ex);
-        }
-//        Pair<User, AuthToken> loginResult = runAuthenticationTask();
-//
-//        authenticatedUser = loginResult.getFirst();
-//        authToken = loginResult.getSecond();
-//
-//        // Call sendSuccessMessage if successful
-//        sendSuccessMessage();
-//        // or call sendFailedMessage if not successful
-//        // sendFailedMessage()
+    protected void extractResponseData(Response response) {
+        this.authenticatedUser = ((AuthenticationResponse)response).getUser();
+        this.authToken = ((AuthenticationResponse)response).getAuthToken();
     }
 
     protected abstract String getPath();
 
-    protected abstract Request createRequest(String username, String password);
+    @Override
+    protected Response callServer(Request request) throws IOException, TweeterRemoteException {
+        return getServerFacade().authenticate((AuthenticationRequest) request, getPath());
+    }
 
-    protected abstract Pair<User, AuthToken> runAuthenticationTask();
+    @Override
+    protected Request createRequest() {
+        return createAuthenticationRequest(username, password);
+    }
+
+    protected abstract Request createAuthenticationRequest(String username, String password);
 
     @Override
     protected void loadSuccessBundle(Bundle msgBundle) {

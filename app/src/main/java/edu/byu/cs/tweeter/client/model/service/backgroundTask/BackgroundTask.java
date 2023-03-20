@@ -9,7 +9,8 @@ import java.io.IOException;
 
 import edu.byu.cs.tweeter.client.model.net.ServerFacade;
 import edu.byu.cs.tweeter.model.net.TweeterRemoteException;
-import edu.byu.cs.tweeter.util.FakeData;
+import edu.byu.cs.tweeter.model.net.request.Request;
+import edu.byu.cs.tweeter.model.net.response.Response;
 
 public abstract class BackgroundTask implements Runnable {
     private static final String LOG_TAG = "BackgroundTask";
@@ -32,18 +33,26 @@ public abstract class BackgroundTask implements Runnable {
     @Override
     public void run() {
         try {
-            runTask();
+            Request request = createRequest();
+            Response response = callServer(request);
+
+            if (response.isSuccess()) {
+                extractResponseData(response);
+                sendSuccessMessage();
+            } else {
+                sendFailedMessage(response.getMessage());
+            }
         } catch (Exception ex) {
             Log.e(LOG_TAG, ex.getMessage(), ex);
             sendExceptionMessage(ex);
         }
     }
 
-    protected abstract void runTask() throws IOException, TweeterRemoteException;
+    protected abstract void extractResponseData(Response response);
 
-    protected FakeData getFakeData() {
-        return FakeData.getInstance();
-    }
+    protected abstract Request createRequest();
+
+    protected abstract Response callServer(Request request) throws IOException, TweeterRemoteException;
 
     /**
      * Returns an instance of {@link ServerFacade}. Allows mocking of the ServerFacade class for

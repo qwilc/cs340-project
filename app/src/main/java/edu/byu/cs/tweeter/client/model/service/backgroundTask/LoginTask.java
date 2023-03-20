@@ -28,14 +28,7 @@ public class LoginTask extends AuthenticateTask {
     }
 
     @Override
-    protected Request createRequest(String username, String password) {
+    protected Request createAuthenticationRequest(String username, String password) {
         return new AuthenticationRequest(username, password);
-    }
-
-    @Override
-    protected Pair<User, AuthToken> runAuthenticationTask() {
-        User loggedInUser = getFakeData().getFirstUser();
-        AuthToken authToken = getFakeData().getAuthToken();
-        return new Pair<>(loggedInUser, authToken);
     }
 }

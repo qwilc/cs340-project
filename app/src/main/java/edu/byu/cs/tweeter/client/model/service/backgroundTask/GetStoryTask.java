@@ -32,8 +32,4 @@ public class GetStoryTask extends PagedStatusTask {
         return getServerFacade().getStory((StatusRequest) request, StatusService.GET_STORY_PATH);
     }
 
-    @Override
-    protected Pair<List<Status>, Boolean> getItems() {
-        return getFakeData().getPageOfStatus(getLastItem(), getLimit());
-    }
 }

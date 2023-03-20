@@ -32,9 +32,4 @@ public class GetFollowingTask extends PagedUserTask {
     protected Response callServer(Request request) throws IOException, TweeterRemoteException {
         return getServerFacade().getFollowees((FollowsRequest) request, FollowService.GET_FOLLOWING_PATH);
     }
-
-    @Override
-    protected Pair<List<User>, Boolean> getItems() {
-        return getFakeData().getPageOfUsers(getLastItem(), getLimit(), getTargetUser());
-    }
 }

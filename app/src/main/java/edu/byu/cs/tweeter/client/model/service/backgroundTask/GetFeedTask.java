@@ -29,9 +29,4 @@ public class GetFeedTask extends PagedStatusTask {
     protected Response callServer(Request request) throws IOException, TweeterRemoteException {
         return getServerFacade().getFeed((StatusRequest) request, StatusService.GET_FEED_PATH);
     }
-
-    @Override
-    protected Pair<List<Status>, Boolean> getItems() {
-        return getFakeData().getPageOfStatus(getLastItem(), getLimit());
-    }
 }

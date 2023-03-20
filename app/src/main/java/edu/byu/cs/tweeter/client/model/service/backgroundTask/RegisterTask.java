@@ -47,14 +47,7 @@ public class RegisterTask extends AuthenticateTask {
     }
 
     @Override
-    protected Request createRequest(String username, String password) {
+    protected Request createAuthenticationRequest(String username, String password) {
         return new RegisterRequest(firstName, lastName, username, password, image);
-    }
-
-    @Override
-    protected Pair<User, AuthToken> runAuthenticationTask() {
-        User registeredUser = getFakeData().getFirstUser();
-        AuthToken authToken = getFakeData().getAuthToken();
-        return new Pair<>(registeredUser, authToken);
     }
 }

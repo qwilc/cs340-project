@@ -110,4 +110,8 @@ public class FollowDAO {
     FakeData getFakeData() {
         return FakeData.getInstance();
     }
+
+    public FollowsResponse getFollowers(FollowsRequest request) {
+        return getFollowees(request);
+    }
 }

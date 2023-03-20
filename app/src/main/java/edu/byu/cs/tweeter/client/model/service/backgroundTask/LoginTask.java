@@ -24,7 +24,7 @@ public class LoginTask extends AuthenticateTask {
 
     @Override
     protected AuthenticationResponse authenticate(Request request) throws IOException, TweeterRemoteException {
-        return getServerFacade().login((LoginRequest) request, UserService.LOGIN_URL_PATH);
+        return getServerFacade().login((LoginRequest) request, UserService.LOGIN_PATH);
     }
 
     @Override

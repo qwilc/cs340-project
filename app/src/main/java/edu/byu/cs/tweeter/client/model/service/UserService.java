@@ -14,8 +14,10 @@ import edu.byu.cs.tweeter.client.presenter.MainPresenter;
 
 public class UserService {
 
-    public static final String LOGIN_URL_PATH = "/login";
+    public static final String GET_USER_PATH = "/getuser";
+    public static final String LOGIN_PATH = "/login";
     public static final String REGISTER_PATH = "/register";
+    public static final String LOGOUT_PATH = "/logout";
 
     public void getUser(String userAlias, UserObserver observer) {
         GetUserTask getUserTask = new GetUserTask(Cache.getInstance().getCurrUserAuthToken(),

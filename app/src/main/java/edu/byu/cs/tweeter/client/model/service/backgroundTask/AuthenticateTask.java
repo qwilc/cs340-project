@@ -6,9 +6,11 @@ import android.util.Log;
 
 import java.io.IOException;
 
+import edu.byu.cs.tweeter.client.model.service.UserService;
 import edu.byu.cs.tweeter.model.domain.AuthToken;
 import edu.byu.cs.tweeter.model.domain.User;
 import edu.byu.cs.tweeter.model.net.TweeterRemoteException;
+import edu.byu.cs.tweeter.model.net.request.AuthenticationRequest;
 import edu.byu.cs.tweeter.model.net.request.Request;
 import edu.byu.cs.tweeter.model.net.response.AuthenticationResponse;
 import edu.byu.cs.tweeter.util.Pair;
@@ -45,7 +47,7 @@ public abstract class AuthenticateTask extends BackgroundTask {
     protected final void runTask()  throws IOException {
         try {
             Request request = createRequest(username, password);
-            AuthenticationResponse response = authenticate(request);
+            AuthenticationResponse response = getServerFacade().authenticate((AuthenticationRequest) request, getPath());
 
             if (response.isSuccess()) {
                 this.authenticatedUser = response.getUser();
@@ -71,7 +73,7 @@ public abstract class AuthenticateTask extends BackgroundTask {
 //        // sendFailedMessage()
     }
 
-    protected abstract AuthenticationResponse authenticate(Request request) throws IOException, TweeterRemoteException;
+    protected abstract String getPath();
 
     protected abstract Request createRequest(String username, String password);
 

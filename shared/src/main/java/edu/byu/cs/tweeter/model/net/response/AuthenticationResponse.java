@@ -2,10 +2,10 @@ package edu.byu.cs.tweeter.model.net.response;
 
 import edu.byu.cs.tweeter.model.domain.AuthToken;
 import edu.byu.cs.tweeter.model.domain.User;
-import edu.byu.cs.tweeter.model.net.request.LoginRequest;
+import edu.byu.cs.tweeter.model.net.request.AuthenticationRequest;
 
 /**
- * A response for a {@link LoginRequest}.
+ * A response for a {@link AuthenticationRequest}.
 */
 public class AuthenticationResponse extends Response {
 

@@ -3,12 +3,12 @@ package edu.byu.cs.tweeter.client.model.net;
 import java.io.IOException;
 
 import edu.byu.cs.tweeter.model.net.TweeterRemoteException;
+import edu.byu.cs.tweeter.model.net.request.AuthenticationRequest;
 import edu.byu.cs.tweeter.model.net.request.FollowsRequest;
-import edu.byu.cs.tweeter.model.net.request.LoginRequest;
+import edu.byu.cs.tweeter.model.net.request.RegisterRequest;
 import edu.byu.cs.tweeter.model.net.request.StatusRequest;
 import edu.byu.cs.tweeter.model.net.response.FollowsResponse;
 import edu.byu.cs.tweeter.model.net.response.AuthenticationResponse;
-import edu.byu.cs.tweeter.model.net.response.Response;
 import edu.byu.cs.tweeter.model.net.response.StatusResponse;
 
 /**
@@ -29,7 +29,7 @@ public class ServerFacade {
      * @param request contains all information needed to perform a login.
      * @return the login response.
      */
-    public AuthenticationResponse login(LoginRequest request, String urlPath) throws IOException, TweeterRemoteException {
+    public AuthenticationResponse authenticate(AuthenticationRequest request, String urlPath) throws IOException, TweeterRemoteException {
         return clientCommunicator.doPost(urlPath, request, null, AuthenticationResponse.class);
     }
 

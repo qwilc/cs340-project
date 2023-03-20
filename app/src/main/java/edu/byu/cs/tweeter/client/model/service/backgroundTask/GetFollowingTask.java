@@ -10,7 +10,10 @@ import edu.byu.cs.tweeter.model.domain.AuthToken;
 import edu.byu.cs.tweeter.model.domain.User;
 import edu.byu.cs.tweeter.model.net.TweeterRemoteException;
 import edu.byu.cs.tweeter.model.net.request.FollowsRequest;
+import edu.byu.cs.tweeter.model.net.request.Request;
 import edu.byu.cs.tweeter.model.net.response.FollowsResponse;
+import edu.byu.cs.tweeter.model.net.response.PagedResponse;
+import edu.byu.cs.tweeter.model.net.response.Response;
 import edu.byu.cs.tweeter.util.Pair;
 
 /**
@@ -26,8 +29,8 @@ public class GetFollowingTask extends PagedUserTask {
     }
 
     @Override
-    protected FollowsResponse callServer(FollowsRequest request) throws IOException, TweeterRemoteException {
-        return getServerFacade().getFollowees(request, FollowService.GET_FOLLOWING_PATH);
+    protected Response callServer(Request request) throws IOException, TweeterRemoteException {
+        return getServerFacade().getFollowees((FollowsRequest) request, FollowService.GET_FOLLOWING_PATH);
     }
 
     @Override

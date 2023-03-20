@@ -24,7 +24,7 @@ public class UserService {
         return new AuthenticationResponse(user, authToken);
     }
 
-    public AuthenticationResponse register(RegisterRequest request) {
+    public AuthenticationResponse register(RegisterRequest request) throws RuntimeException {
         if(request.getUsername() == null){
             throw new RuntimeException("[Bad Request] Missing a username");
         }

@@ -122,7 +122,7 @@ public class StatusServiceIntegrationTest {
 
         Assertions.assertTrue(observer.isSuccess());
         Assertions.assertNull(observer.getMessage());
-//        Assertions.assertEquals(checkList, observer.getStatuses());
+        Assertions.assertEquals(checkList, observer.getStatuses());
         Assertions.assertTrue(observer.hasMorePages());
         Assertions.assertNull(observer.getException());
     }

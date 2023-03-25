@@ -14,7 +14,7 @@ import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
 import java.util.HashMap;
 import java.util.Map;
 
-public class DynamoFollowsDAO {
+public class DynamoFollowsDAO implements FollowsDAO {
     private static final String TableName = "follows";
     public static final String IndexName = "follows_index";
 

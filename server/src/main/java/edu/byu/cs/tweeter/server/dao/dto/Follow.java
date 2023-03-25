@@ -10,6 +10,8 @@ public class Follow {
     private String follower_name;
     private String followee_name;
 
+    //TODO: Do I want to store image here as well or just get it from UserDAO?
+
     @DynamoDbPartitionKey
     @DynamoDbSecondarySortKey(indexNames = DynamoFollowsDAO.IndexName)
     public String getFollower_handle() {

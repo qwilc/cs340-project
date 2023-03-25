@@ -12,11 +12,14 @@ import edu.byu.cs.tweeter.model.net.response.GetCountResponse;
 import edu.byu.cs.tweeter.model.net.response.IsFollowerResponse;
 import edu.byu.cs.tweeter.model.net.response.UpdateFollowResponse;
 import edu.byu.cs.tweeter.server.dao.FollowDAO;
+import edu.byu.cs.tweeter.server.dao.factory.AbstractDAOFactory;
 
 /**
  * Contains the business logic for getting the users a user is following.
  */
 public class FollowService {
+
+    private AbstractDAOFactory daoFactory;
 
     /**
      * Returns the users that the user specified in the request is following. Uses information in

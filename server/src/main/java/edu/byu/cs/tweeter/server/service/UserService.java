@@ -4,9 +4,11 @@ import edu.byu.cs.tweeter.model.domain.AuthToken;
 import edu.byu.cs.tweeter.model.domain.User;
 import edu.byu.cs.tweeter.model.net.request.AuthenticationRequest;
 import edu.byu.cs.tweeter.model.net.request.GetUserRequest;
+import edu.byu.cs.tweeter.model.net.request.LogoutRequest;
 import edu.byu.cs.tweeter.model.net.request.RegisterRequest;
 import edu.byu.cs.tweeter.model.net.response.AuthenticationResponse;
 import edu.byu.cs.tweeter.model.net.response.GetUserResponse;
+import edu.byu.cs.tweeter.model.net.response.LogoutResponse;
 import edu.byu.cs.tweeter.util.FakeData;
 
 public class UserService {
@@ -45,6 +47,10 @@ public class UserService {
         User user = getDummyUser();
         AuthToken authToken = getDummyAuthToken();
         return new AuthenticationResponse(user, authToken);
+    }
+
+    public LogoutResponse logout(LogoutRequest request) {
+        return new LogoutResponse();
     }
 
     public GetUserResponse getUser(GetUserRequest request) {

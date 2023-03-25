@@ -23,12 +23,10 @@ import edu.byu.cs.tweeter.util.FakeData;
 public class ServerFacadeTest {
 
     ServerFacade serverFacade;
-    FakeData fakeData;
 
     @BeforeEach
     public void setup() {
         serverFacade = new ServerFacade();
-        fakeData = FakeData.getInstance();
     }
 
     @Test
@@ -42,15 +40,13 @@ public class ServerFacadeTest {
         RegisterRequest request = new RegisterRequest(firstName, lastName, username, password, image);
         AuthenticationResponse response = serverFacade.authenticate(request, UserService.REGISTER_PATH);
 
-        AuthToken expectedToken = fakeData.getAuthToken();
+        FakeData fakeData = FakeData.getInstance();
         User expectedUser = fakeData.getFirstUser();
 
         Assertions.assertTrue(response.isSuccess());
         Assertions.assertNull(response.getMessage());
-        Assertions.assertNotNull(response.getAuthToken());
-        // TODO: the fake data should return the same auth token each time, right?
-        //Assertions.assertEquals(expectedToken, response.getAuthToken());
         Assertions.assertEquals(expectedUser, response.getUser());
+        Assertions.assertNotNull(response.getAuthToken());
     }
 
     @Test
@@ -80,6 +76,7 @@ public class ServerFacadeTest {
         FollowsRequest request = new FollowsRequest(authToken, alias, limit, lastAlias);
         FollowsResponse response = serverFacade.getFollowers(request, FollowService.GET_FOLLOWERS_PATH);
 
+        FakeData fakeData = FakeData.getInstance();
         List<User> expectedFollowers = fakeData.getFakeUsers().subList(0, limit);
 
         Assertions.assertTrue(response.isSuccess());

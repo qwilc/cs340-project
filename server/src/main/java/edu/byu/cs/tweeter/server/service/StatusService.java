@@ -5,8 +5,10 @@ import java.util.List;
 
 import edu.byu.cs.tweeter.model.domain.Status;
 import edu.byu.cs.tweeter.model.domain.User;
+import edu.byu.cs.tweeter.model.net.request.PostStatusRequest;
 import edu.byu.cs.tweeter.model.net.request.StatusRequest;
 import edu.byu.cs.tweeter.model.net.response.FollowsResponse;
+import edu.byu.cs.tweeter.model.net.response.PostStatusResponse;
 import edu.byu.cs.tweeter.model.net.response.StatusResponse;
 import edu.byu.cs.tweeter.util.FakeData;
 
@@ -41,6 +43,10 @@ public class StatusService {
 
     public StatusResponse getStory(StatusRequest request) {
         return getFeed(request);
+    }
+
+    public PostStatusResponse postStatus(PostStatusRequest request) {
+        return new PostStatusResponse();
     }
 
     public int getStatusesStartingIndex(Status lastStatus, List<Status> allStatuses) {

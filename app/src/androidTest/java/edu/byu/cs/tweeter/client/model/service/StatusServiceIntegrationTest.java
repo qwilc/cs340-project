@@ -1,17 +1,13 @@
 package edu.byu.cs.tweeter.client.model.service;
 
-import static org.mockito.ArgumentMatchers.eq;
-
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
 import org.mockito.Mockito;
 
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
-import edu.byu.cs.tweeter.client.model.service.StatusService;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.PagedObserver;
 import edu.byu.cs.tweeter.model.domain.AuthToken;
 import edu.byu.cs.tweeter.model.domain.Status;
@@ -117,7 +113,6 @@ public class StatusServiceIntegrationTest {
         statusServiceSpy.loadMoreStoryItems(currentUser, pageSize, null, observer);
         awaitCountDownLatch();
 
-        // TODO: The timestamps aren't equal
         List<Status> checkList = FakeData.getInstance().getFakeStatuses().subList(0, pageSize);
 
         Assertions.assertTrue(observer.isSuccess());

@@ -1,16 +1,17 @@
 package edu.byu.cs.tweeter.server.dao.dto;
 
+import edu.byu.cs.tweeter.model.domain.User;
 import edu.byu.cs.tweeter.server.dao.DynamoFollowsDAO;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.*;
 
 @DynamoDbBean
-public class Follow {
+public class FollowBean {
     private String follower_handle;
     private String followee_handle;
     private String follower_name;
     private String followee_name;
-
-    //TODO: Do I want to store image here as well or just get it from UserDAO?
+    private String follower_image_url; // TODO: url, right?
+    private String followee_image_url;
 
     @DynamoDbPartitionKey
     @DynamoDbSecondarySortKey(indexNames = DynamoFollowsDAO.IndexName)
@@ -46,5 +47,31 @@ public class Follow {
 
     public void setFollowee_name(String followee_name) {
         this.followee_name = followee_name;
+    }
+
+    public String getFollower_image_url() {
+        return follower_image_url;
+    }
+
+    public void setFollower_image_url(String follower_image_url) {
+        this.follower_image_url = follower_image_url;
+    }
+
+    public String getFollowee_image_url() {
+        return followee_image_url;
+    }
+
+    public void setFollowee_image_url(String followee_image_url) {
+        this.followee_image_url = followee_image_url;
+    }
+
+    public User getFollowerAsUser() {
+        String[] name = follower_name.split(" ");
+        return new User(name[0], name[1], follower_handle, follower_image_url);
+    }
+
+    public User getFolloweeAsUser() {
+        String[] name = followee_name.split(" ");
+        return new User(name[0], name[1], followee_handle, followee_image_url);
     }
 }

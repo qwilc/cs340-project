@@ -2,10 +2,8 @@ package edu.byu.cs.tweeter.server.dao.dto;
 
 import java.util.List;
 
-import edu.byu.cs.tweeter.model.domain.Status;
-import edu.byu.cs.tweeter.model.domain.User;
-import edu.byu.cs.tweeter.server.dao.DynamoFeedDAO;
-import edu.byu.cs.tweeter.server.dao.DynamoFollowsDAO;
+import edu.byu.cs.tweeter.server.dao.dynamo.DynamoFeedDAO;
+import edu.byu.cs.tweeter.server.dao.dynamo.DynamoStoryDAO;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbBean;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbPartitionKey;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbSecondaryPartitionKey;
@@ -13,15 +11,28 @@ import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbSecon
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbSortKey;
 
 @DynamoDbBean
-public class StatusBean {
+public class FeedBean {
+    private String alias;
     private String author_alias;
     private Long timestamp;
+    private String first_name;
+    private String last_name;
     private String content;
     private List<String> urls;
     private List<String> mentions;
+    private String image_url;
 
+    // TODO: Did I do the index names right?
     @DynamoDbPartitionKey
     @DynamoDbSecondarySortKey(indexNames = DynamoFeedDAO.IndexName)
+    public String getAlias() {
+        return alias;
+    }
+
+    public void setAlias(String alias) {
+        this.alias = alias;
+    }
+
     public String getAuthor_alias() {
         return author_alias;
     }
@@ -64,9 +75,28 @@ public class StatusBean {
         this.mentions = mentions;
     }
 
-    // TODO: Maybe conversion should happen in DAOs?
-    public Status convertToStatus() {
-        User dummyUser = new User(null, null, author_alias, null);
-        return new Status(content, dummyUser, timestamp, urls, mentions);
+    public String getFirst_name() {
+        return first_name;
     }
+
+    public void setFirst_name(String first_name) {
+        this.first_name = first_name;
+    }
+
+    public String getLast_name() {
+        return last_name;
+    }
+
+    public void setLast_name(String last_name) {
+        this.last_name = last_name;
+    }
+
+    public String getImage_url() {
+        return image_url;
+    }
+
+    public void setImage_url(String image_url) {
+        this.image_url = image_url;
+    }
+
 }

@@ -1,6 +1,8 @@
-package edu.byu.cs.tweeter.server.dao;
+package edu.byu.cs.tweeter.server.dao.dynamo;
 
 import edu.byu.cs.tweeter.model.domain.User;
+import edu.byu.cs.tweeter.server.dao.DataPage;
+import edu.byu.cs.tweeter.server.dao.FollowsDAO;
 import edu.byu.cs.tweeter.server.dao.dto.FollowBean;
 import edu.byu.cs.tweeter.util.Pair;
 import software.amazon.awssdk.core.pagination.sync.SdkIterable;
@@ -37,14 +39,17 @@ public class DynamoFollowsDAO implements FollowsDAO {
         return (value != null && value.length() > 0);
     }
 
-    public void addFollow(String follower_handle, String follower_name, String followee_handle, String followee_name) {
+    @Override
+    public void addFollow(String follower_handle, String follower_firstname, String follower_lastname, String followee_handle, String followee_firstname, String followee_lastname) {
         DynamoDbTable<FollowBean> table = enhancedClient.table(TableName, TableSchema.fromBean(FollowBean.class));
 
         FollowBean newFollow = new FollowBean();
         newFollow.setFollower_handle(follower_handle);
-        newFollow.setFollower_name(follower_name);
+        newFollow.setFollower_firstname(follower_firstname);
+        newFollow.setFollower_lastname(follower_lastname);
         newFollow.setFollowee_handle(followee_handle);
-        newFollow.setFollowee_name(followee_name);
+        newFollow.setFollowee_firstname(followee_firstname);
+        newFollow.setFollowee_lastname(followee_lastname);
         table.putItem(newFollow);
     }
 
@@ -54,26 +59,32 @@ public class DynamoFollowsDAO implements FollowsDAO {
                 .partitionValue(follower_handle).sortValue(followee_handle)
                 .build();
 
-        FollowBean follow = table.getItem(key);
-        // TODO: return something else or make private
-        return follow;
+        // TODO: make private (only place using it elsewhere is my bad test)
+        return table.getItem(key);
     }
 
-    // TODO: when will this be used and if it is used, should it be two separate functions
-    public void updateNames(String follower_handle, String follower_name, String followee_handle, String followee_name) {
-        DynamoDbTable<FollowBean> table = enhancedClient.table(TableName, TableSchema.fromBean(FollowBean.class));
-        Key key = Key.builder()
-                .partitionValue(follower_handle).sortValue(followee_handle)
-                .build();
-
-        FollowBean follow = table.getItem(key);
-
-        //TODO: error in case where it doesn't exist?
-        follow.setFollowee_name(followee_name);
-        follow.setFollower_name(follower_name);
-        table.updateItem(follow);
+    @Override
+    public Boolean isFollower(String follower_alias, String followee_alias) {
+        FollowBean follow = getFollow(follower_alias, followee_alias);
+        // TODO: Does it return null?
+        return follow != null;
     }
 
+    // TODO: delete; currently just keeping it to remind me how to update
+//    public void updateNames(String follower_handle, String follower_name, String followee_handle, String followee_name) {
+//        DynamoDbTable<FollowBean> table = enhancedClient.table(TableName, TableSchema.fromBean(FollowBean.class));
+//        Key key = Key.builder()
+//                .partitionValue(follower_handle).sortValue(followee_handle)
+//                .build();
+//
+//        FollowBean follow = table.getItem(key);
+//
+//        follow.setFollowee_firstname(followee_name);
+//        follow.setFollower_firstname(follower_name);
+//        table.updateItem(follow);
+//    }
+
+    @Override
     public void deleteFollow(String follower_handle, String followee_handle) {
         DynamoDbTable<FollowBean> table = enhancedClient.table(TableName, TableSchema.fromBean(FollowBean.class));
         Key key = Key.builder()
@@ -82,6 +93,7 @@ public class DynamoFollowsDAO implements FollowsDAO {
         table.deleteItem(key);
     }
 
+    @Override
     public Pair<List<User>, Boolean> getPageOfFollowers(String targetUserAlias, int pageSize, String lastUserAlias ) {
         DynamoDbIndex<FollowBean> index = enhancedClient.table(TableName, TableSchema.fromBean(FollowBean.class)).index(IndexName);
         Key key = Key.builder()
@@ -120,8 +132,9 @@ public class DynamoFollowsDAO implements FollowsDAO {
             users.add(follow.getFollowerAsUser());
         }
         return new Pair(users, result.hasMorePages());
-}
+    }
 
+    @Override
     public Pair<List<User>, Boolean> getPageOfFollowees(String targetUserAlias, int pageSize, String lastUserAlias ) {
         DynamoDbTable<FollowBean> table = enhancedClient.table(TableName, TableSchema.fromBean(FollowBean.class));
         Key key = Key.builder()
@@ -130,7 +143,7 @@ public class DynamoFollowsDAO implements FollowsDAO {
 
         QueryEnhancedRequest.Builder requestBuilder = QueryEnhancedRequest.builder()
                 .queryConditional(QueryConditional.keyEqualTo(key))
-                .scanIndexForward(true)
+                .scanIndexForward(true) // TODO: make sure both story and feed are in time order
                 .limit(pageSize);
 
         if(isNonEmptyString(lastUserAlias)) {

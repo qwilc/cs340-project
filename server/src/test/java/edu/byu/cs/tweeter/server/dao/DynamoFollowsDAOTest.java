@@ -1,6 +1,7 @@
 package edu.byu.cs.tweeter.server.dao;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -11,6 +12,7 @@ import java.util.List;
 import edu.byu.cs.tweeter.model.domain.AuthToken;
 import edu.byu.cs.tweeter.model.domain.User;
 import edu.byu.cs.tweeter.server.dao.dto.FollowBean;
+import edu.byu.cs.tweeter.server.dao.dynamo.DynamoFollowsDAO;
 import edu.byu.cs.tweeter.util.Pair;
 
 public class DynamoFollowsDAOTest {
@@ -35,14 +37,30 @@ public class DynamoFollowsDAOTest {
 
     @Test
     public void testSuccessfulAdd() {
-        dao.addFollow("@testfollower", "Test Follower", "@testfollowee", "Test Followee");
+        dao.addFollow("@allen", "Allen", "Anderson", "@testfollowee", "Test", "Followee");
+        dao.addFollow("@follower", "Test", "Follower", "@allen", "Allen", "Anderson");
+        dao.addFollow("@testfollower", "Test", "Follower", "@testfollowee", "Test", "Followee");
         FollowBean follow = dao.getFollow("@testfollower", "@testfollowee");
 
         assertNotNull(follow);
-        assertEquals("Test Follower", follow.getFollower_name());
-        assertEquals("Test Followee", follow.getFollowee_name());
+        assertEquals("Test Follower", follow.getFollower_firstname());
+        assertEquals("Test Followee", follow.getFollowee_firstname());
 
         dao.deleteFollow("@testfollower", "@testfollowee");
+    }
+
+    @Test
+    public void testGetPageFollowees_NoResult() {
+        Pair<List<User>, Boolean> result = dao.getPageOfFollowees("@Nonexistent", 10, null);
+        assertEquals(0, result.getFirst().size());
+        assertFalse(result.getSecond());
+    }
+
+    @Test
+    public void testGetPageFollowees_WrongLastUserAlias() {
+        Pair<List<User>, Boolean> result = dao.getPageOfFollowees("@Nonexistent", 10, "@Nonexistent");
+        assertEquals(0, result.getFirst().size());
+        assertFalse(result.getSecond());
     }
 
     // FIXME: These aren't proper tests. I'm just manually checking what's printed and I'm depending on data that's already there

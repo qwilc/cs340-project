@@ -8,7 +8,7 @@ public class UserBean {
     String alias;
     String firstName;
     String lastName;
-    String image; // TODO: image URL?
+    String image_url;
     String password;
     int followerCount;
     int followeeCount;
@@ -38,12 +38,12 @@ public class UserBean {
         this.lastName = lastName;
     }
 
-    public String getImage() {
-        return image;
+    public String getImage_url() {
+        return image_url;
     }
 
-    public void setImage(String image) {
-        this.image = image;
+    public void setImage_url(String image_url) {
+        this.image_url = image_url;
     }
 
     public String getPassword() {

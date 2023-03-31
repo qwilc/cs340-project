@@ -1,12 +1,13 @@
 package edu.byu.cs.tweeter.server.dao;
 
 import edu.byu.cs.tweeter.model.domain.User;
-import edu.byu.cs.tweeter.model.net.request.GetCountRequest;
 
 public interface UserDAO {
     User getUser(String alias);
 
-    int getFollowingCount(GetCountRequest request);
+    void addUser(String alias, String firstName, String lastName, String imageURL);
 
-    int getFollowersCount(String followee_handle);
+    int getFollowingCount(String alias);
+
+    int getFollowersCount(String alias);
 }

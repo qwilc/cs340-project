@@ -16,7 +16,7 @@ public class GetFollowersPresenter extends UserPagePresenter {
     public class GetFollowersObserver extends PagedPresenter<User>.PagedObserver {
         @Override
         public String getPrefix() {
-            return "Failed to get following";
+            return "Failed to get followers";
         }
     }
 }

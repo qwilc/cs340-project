@@ -1,7 +1,6 @@
 package edu.byu.cs.tweeter.client.model.service.backgroundTask;
 
 import android.os.Handler;
-import android.util.Log;
 
 import java.io.IOException;
 
@@ -9,11 +8,9 @@ import edu.byu.cs.tweeter.client.model.service.FollowService;
 import edu.byu.cs.tweeter.model.domain.AuthToken;
 import edu.byu.cs.tweeter.model.domain.User;
 import edu.byu.cs.tweeter.model.net.TweeterRemoteException;
-import edu.byu.cs.tweeter.model.net.request.FollowRequest;
 import edu.byu.cs.tweeter.model.net.request.Request;
-import edu.byu.cs.tweeter.model.net.request.UnfollowRequest;
+import edu.byu.cs.tweeter.model.net.request.UpdateFollowRequest;
 import edu.byu.cs.tweeter.model.net.response.Response;
-import edu.byu.cs.tweeter.model.net.response.UpdateFollowResponse;
 
 /**
  * Background task that removes a following relationship between two users.
@@ -39,11 +36,11 @@ public class UnfollowTask extends AuthenticatedTask {
 
     @Override
     protected Request createRequest() {
-        return new UnfollowRequest(getAuthToken(), followee);
+        return new UpdateFollowRequest(getAuthToken(), followee);
     }
 
     @Override
     protected Response callServer(Request request) throws IOException, TweeterRemoteException {
-        return getServerFacade().unfollow((UnfollowRequest) request, FollowService.UNFOLLOW_PATH);
+        return getServerFacade().unfollow((UpdateFollowRequest) request, FollowService.UNFOLLOW_PATH);
     }
 }

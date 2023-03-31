@@ -4,18 +4,16 @@ import java.io.IOException;
 
 import edu.byu.cs.tweeter.model.net.TweeterRemoteException;
 import edu.byu.cs.tweeter.model.net.request.AuthenticationRequest;
-import edu.byu.cs.tweeter.model.net.request.FollowRequest;
 import edu.byu.cs.tweeter.model.net.request.FollowsRequest;
 import edu.byu.cs.tweeter.model.net.request.GetCountRequest;
 import edu.byu.cs.tweeter.model.net.request.GetUserRequest;
 import edu.byu.cs.tweeter.model.net.request.IsFollowerRequest;
 import edu.byu.cs.tweeter.model.net.request.LogoutRequest;
 import edu.byu.cs.tweeter.model.net.request.PostStatusRequest;
-import edu.byu.cs.tweeter.model.net.request.RegisterRequest;
 import edu.byu.cs.tweeter.model.net.request.StatusRequest;
-import edu.byu.cs.tweeter.model.net.request.UnfollowRequest;
-import edu.byu.cs.tweeter.model.net.response.FollowsResponse;
+import edu.byu.cs.tweeter.model.net.request.UpdateFollowRequest;
 import edu.byu.cs.tweeter.model.net.response.AuthenticationResponse;
+import edu.byu.cs.tweeter.model.net.response.FollowsResponse;
 import edu.byu.cs.tweeter.model.net.response.GetCountResponse;
 import edu.byu.cs.tweeter.model.net.response.GetUserResponse;
 import edu.byu.cs.tweeter.model.net.response.IsFollowerResponse;
@@ -73,11 +71,11 @@ public class ServerFacade {
         return clientCommunicator.doPost(urlPath, request, null, StatusResponse.class);
     }
 
-    public UpdateFollowResponse follow(FollowRequest request, String urlPath) throws IOException, TweeterRemoteException {
+    public UpdateFollowResponse follow(UpdateFollowRequest request, String urlPath) throws IOException, TweeterRemoteException {
         return clientCommunicator.doPost(urlPath, request, null, UpdateFollowResponse.class);
     }
 
-    public UpdateFollowResponse unfollow(UnfollowRequest request, String urlPath) throws IOException, TweeterRemoteException {
+    public UpdateFollowResponse unfollow(UpdateFollowRequest request, String urlPath) throws IOException, TweeterRemoteException {
         return clientCommunicator.doPost(urlPath, request, null, UpdateFollowResponse.class);
     }
 

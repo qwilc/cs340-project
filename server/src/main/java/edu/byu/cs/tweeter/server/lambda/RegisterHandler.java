@@ -5,12 +5,13 @@ import com.amazonaws.services.lambda.runtime.RequestHandler;
 
 import edu.byu.cs.tweeter.model.net.request.RegisterRequest;
 import edu.byu.cs.tweeter.model.net.response.AuthenticationResponse;
+import edu.byu.cs.tweeter.server.dao.factory.DynamoDAOFactory;
 import edu.byu.cs.tweeter.server.service.UserService;
 
 public class RegisterHandler implements RequestHandler<RegisterRequest, AuthenticationResponse>  {
     @Override
     public AuthenticationResponse handleRequest(RegisterRequest request, Context context) {
-        UserService userService = new UserService();
+        UserService userService = new UserService(new DynamoDAOFactory());
         return userService.register(request);
     }
 }

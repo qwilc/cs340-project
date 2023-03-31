@@ -9,9 +9,20 @@ import edu.byu.cs.tweeter.model.net.request.RegisterRequest;
 import edu.byu.cs.tweeter.model.net.response.AuthenticationResponse;
 import edu.byu.cs.tweeter.model.net.response.GetUserResponse;
 import edu.byu.cs.tweeter.model.net.response.LogoutResponse;
+import edu.byu.cs.tweeter.server.dao.factory.AbstractDAOFactory;
 import edu.byu.cs.tweeter.util.FakeData;
 
 public class UserService {
+
+    private AbstractDAOFactory daoFactory;
+
+    public UserService(AbstractDAOFactory daoFactory) {
+        this.daoFactory = daoFactory;
+    }
+
+    public AbstractDAOFactory getDaoFactory() {
+        return daoFactory;
+    }
 
     public AuthenticationResponse login(AuthenticationRequest request) {
         if(request.getUsername() == null){
@@ -54,6 +65,7 @@ public class UserService {
     }
 
     public GetUserResponse getUser(GetUserRequest request) {
+        String alias = request.getAlias();
         return new GetUserResponse(getFakeData().findUserByAlias(request.getAlias()));
     }
 

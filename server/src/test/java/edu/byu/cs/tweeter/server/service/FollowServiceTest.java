@@ -12,7 +12,7 @@ import edu.byu.cs.tweeter.model.domain.AuthToken;
 import edu.byu.cs.tweeter.model.domain.User;
 import edu.byu.cs.tweeter.model.net.request.FollowsRequest;
 import edu.byu.cs.tweeter.model.net.response.FollowsResponse;
-import edu.byu.cs.tweeter.server.dao.DynamoFollowsDAO;
+import edu.byu.cs.tweeter.server.dao.dynamo.DynamoFollowsDAO;
 import edu.byu.cs.tweeter.server.dao.ExampleFollowDAO;
 import edu.byu.cs.tweeter.server.dao.factory.DynamoDAOFactory;
 import edu.byu.cs.tweeter.util.Pair;

@@ -12,8 +12,22 @@ public class FollowBean {
     private String follower_lastname;
     private String followee_firstname;
     private String followee_lastname;
-    private String follower_image_url; // TODO: url, right?
+    private String follower_image_url;
     private String followee_image_url;
+
+    public FollowBean() {
+    }
+
+    public FollowBean(String follower_handle, String followee_handle, String follower_firstname, String follower_lastname, String followee_firstname, String followee_lastname, String follower_image_url, String followee_image_url) {
+        this.follower_handle = follower_handle;
+        this.followee_handle = followee_handle;
+        this.follower_firstname = follower_firstname;
+        this.follower_lastname = follower_lastname;
+        this.followee_firstname = followee_firstname;
+        this.followee_lastname = followee_lastname;
+        this.follower_image_url = follower_image_url;
+        this.followee_image_url = followee_image_url;
+    }
 
     @DynamoDbPartitionKey
     @DynamoDbSecondarySortKey(indexNames = DynamoFollowsDAO.IndexName)

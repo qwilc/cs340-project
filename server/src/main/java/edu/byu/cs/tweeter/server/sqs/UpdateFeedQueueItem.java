@@ -1,17 +1,8 @@
-package edu.byu.cs.tweeter.server.dao.dto;
+package edu.byu.cs.tweeter.server.sqs;
 
 import java.util.List;
 
-import edu.byu.cs.tweeter.server.dao.dynamo.DynamoFeedDAO;
-import edu.byu.cs.tweeter.server.dao.dynamo.DynamoStoryDAO;
-import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbBean;
-import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbPartitionKey;
-import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbSecondaryPartitionKey;
-import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbSecondarySortKey;
-import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbSortKey;
-
-@DynamoDbBean
-public class FeedBean {
+public class UpdateFeedQueueItem {
     private String alias;
     private String author_alias;
     private Long timestamp;
@@ -22,8 +13,21 @@ public class FeedBean {
     private List<String> mentions;
     private String image_url;
 
-    @DynamoDbPartitionKey
-    @DynamoDbSecondarySortKey(indexNames = DynamoFeedDAO.IndexName)
+    public UpdateFeedQueueItem() {
+    }
+
+    public UpdateFeedQueueItem(String alias, String author_alias, Long timestamp, String first_name, String last_name, String content, List<String> urls, List<String> mentions, String image_url) {
+        this.alias = alias;
+        this.author_alias = author_alias;
+        this.timestamp = timestamp;
+        this.first_name = first_name;
+        this.last_name = last_name;
+        this.content = content;
+        this.urls = urls;
+        this.mentions = mentions;
+        this.image_url = image_url;
+    }
+
     public String getAlias() {
         return alias;
     }
@@ -40,14 +44,28 @@ public class FeedBean {
         this.author_alias = author_alias;
     }
 
-    @DynamoDbSortKey
-    @DynamoDbSecondaryPartitionKey(indexNames = DynamoFeedDAO.IndexName)
     public Long getTimestamp() {
         return timestamp;
     }
 
     public void setTimestamp(Long timestamp) {
         this.timestamp = timestamp;
+    }
+
+    public String getFirst_name() {
+        return first_name;
+    }
+
+    public void setFirst_name(String first_name) {
+        this.first_name = first_name;
+    }
+
+    public String getLast_name() {
+        return last_name;
+    }
+
+    public void setLast_name(String last_name) {
+        this.last_name = last_name;
     }
 
     public String getContent() {
@@ -74,22 +92,6 @@ public class FeedBean {
         this.mentions = mentions;
     }
 
-    public String getFirst_name() {
-        return first_name;
-    }
-
-    public void setFirst_name(String first_name) {
-        this.first_name = first_name;
-    }
-
-    public String getLast_name() {
-        return last_name;
-    }
-
-    public void setLast_name(String last_name) {
-        this.last_name = last_name;
-    }
-
     public String getImage_url() {
         return image_url;
     }
@@ -97,5 +99,4 @@ public class FeedBean {
     public void setImage_url(String image_url) {
         this.image_url = image_url;
     }
-
 }

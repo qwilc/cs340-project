@@ -66,8 +66,9 @@ public class MainPresenter extends Presenter {
         if (selectedUser.compareTo(Cache.getInstance().getCurrUser()) == 0) {
             ((MainView)getView()).setFollowButtonVisibility(false);
         } else {
-            ((MainView)getView()).setFollowButtonVisibility(true);
+//            ((MainView) getView()).displayFollowButton();
             followService.isFollower(selectedUser, new IsFollowerObserver());
+            ((MainView)getView()).setFollowButtonVisibility(true);
         }
     }
 

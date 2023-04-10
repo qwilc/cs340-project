@@ -4,7 +4,7 @@ import edu.byu.cs.tweeter.model.domain.AuthToken;
 import edu.byu.cs.tweeter.model.domain.User;
 
 public class IsFollowerRequest extends Request {
-    AuthToken authToken;
+    private AuthToken authToken;
     private User follower;
     private User followee;
 
@@ -15,6 +15,14 @@ public class IsFollowerRequest extends Request {
         this.authToken = authToken;
         this.follower = follower;
         this.followee = followee;
+    }
+
+    public AuthToken getAuthToken() {
+        return authToken;
+    }
+
+    public void setAuthToken(AuthToken authToken) {
+        this.authToken = authToken;
     }
 
     public User getFollower() {

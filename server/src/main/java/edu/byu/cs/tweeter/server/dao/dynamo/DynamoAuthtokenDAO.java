@@ -1,6 +1,9 @@
 package edu.byu.cs.tweeter.server.dao.dynamo;
 
-import edu.byu.cs.tweeter.server.dao.AuthtokenDAO;
+import java.util.UUID;
+
+import edu.byu.cs.tweeter.model.domain.AuthToken;
+import edu.byu.cs.tweeter.server.dao.abstractDAO.AuthtokenDAO;
 import edu.byu.cs.tweeter.server.dao.dto.AuthtokenBean;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
@@ -12,6 +15,7 @@ import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 public class DynamoAuthtokenDAO implements AuthtokenDAO {
 
     private static final String TableName = "authtoken";
+    private static final long TimeoutLength = 3600000;
 
     private static DynamoDbClient dynamoDbClient = DynamoDbClient.builder()
             .region(Region.US_EAST_2)
@@ -21,21 +25,47 @@ public class DynamoAuthtokenDAO implements AuthtokenDAO {
             .dynamoDbClient(dynamoDbClient)
             .build();
 
+    private final DynamoDbTable<AuthtokenBean> table = enhancedClient.table(TableName, TableSchema.fromBean(AuthtokenBean.class));
+
     @Override
-    public void addAuthtoken(String alias) {
-        DynamoDbTable<AuthtokenBean> table = enhancedClient.table(TableName, TableSchema.fromBean(AuthtokenBean.class));
+    public boolean validateAuthtoken(String authtoken) {
+        if(isValidAuthtoken(authtoken)) {
+            updateTimestamp(authtoken);
+            return true;
+        }
+        else {
+            removeAuthtoken(authtoken);
+            return false;
+        }
+    }
+    @Override
+    public boolean isValidAuthtoken(String authtoken) {
+            long current_time = System.currentTimeMillis();
+            long last_time = getTimestamp(authtoken);
+
+            long elapsed_time = current_time - last_time;
+
+            return elapsed_time < TimeoutLength;
+    }
+
+    @Override
+    public AuthToken createAuthtoken(String alias) {
         AuthtokenBean bean = new AuthtokenBean();
-        // TODO: ACTUAL TIMESTAMP AND TOKEN
-        bean.setTimestamp(123L);
+
+        long time = System.currentTimeMillis();
+        String token = UUID.randomUUID().toString();
+
+        bean.setTimestamp(time);
         bean.setAlias(alias);
-        bean.setAuthtoken("123");
+        bean.setAuthtoken(token);
 
         table.putItem(bean);
+
+        return new AuthToken(token, String.valueOf(time));
     }
 
     @Override
     public void removeAuthtoken(String authtoken) {
-        DynamoDbTable<AuthtokenBean> table = enhancedClient.table(TableName, TableSchema.fromBean(AuthtokenBean.class));
         Key key = Key.builder()
                 .partitionValue(authtoken)
                 .build();
@@ -56,18 +86,12 @@ public class DynamoAuthtokenDAO implements AuthtokenDAO {
 
     @Override
     public void updateTimestamp(String authtoken) {
-        DynamoDbTable<AuthtokenBean> table = enhancedClient.table(TableName, TableSchema.fromBean(AuthtokenBean.class));
-        Key key = Key.builder()
-                .partitionValue(authtoken)
-                .build();
-        AuthtokenBean bean = table.getItem(key);
-        // TODO: update timestamp or maybe update in the validate function?
+        AuthtokenBean bean = getAuthtokenBean(authtoken);
+        bean.setTimestamp(System.currentTimeMillis());
         table.updateItem(bean);
-
     }
 
     private AuthtokenBean getAuthtokenBean(String authtoken) {
-        DynamoDbTable<AuthtokenBean> table = enhancedClient.table(TableName, TableSchema.fromBean(AuthtokenBean.class));
         Key key = Key.builder()
                 .partitionValue(authtoken)
                 .build();

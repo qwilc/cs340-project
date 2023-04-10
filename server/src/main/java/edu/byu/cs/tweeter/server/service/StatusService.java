@@ -1,16 +1,23 @@
 package edu.byu.cs.tweeter.server.service;
 
+import com.google.gson.Gson;
+
+import java.util.ArrayList;
 import java.util.List;
 
 import edu.byu.cs.tweeter.model.domain.Status;
+import edu.byu.cs.tweeter.model.domain.User;
 import edu.byu.cs.tweeter.model.net.request.PostStatusRequest;
 import edu.byu.cs.tweeter.model.net.request.StatusRequest;
 import edu.byu.cs.tweeter.model.net.response.PostStatusResponse;
 import edu.byu.cs.tweeter.model.net.response.StatusResponse;
-import edu.byu.cs.tweeter.server.dao.FeedDAO;
-import edu.byu.cs.tweeter.server.dao.StatusDAO;
-import edu.byu.cs.tweeter.server.dao.StoryDAO;
+import edu.byu.cs.tweeter.server.dao.abstractDAO.FeedDAO;
+import edu.byu.cs.tweeter.server.dao.abstractDAO.FollowsDAO;
+import edu.byu.cs.tweeter.server.dao.abstractDAO.StoryDAO;
+import edu.byu.cs.tweeter.server.dao.dto.FeedBean;
 import edu.byu.cs.tweeter.server.dao.factory.AbstractDAOFactory;
+import edu.byu.cs.tweeter.server.sqs.SQSAccessor;
+import edu.byu.cs.tweeter.server.sqs.UpdateFeedQueueItem;
 import edu.byu.cs.tweeter.util.Pair;
 
 public class StatusService {
@@ -24,9 +31,13 @@ public class StatusService {
         return daoFactory;
     }
 
-    // TODO getFeed and getStory are very similar - could just pass in different DAO, but need base DAO first
     public StatusResponse getFeed(StatusRequest request) {
         validateGetPageRequest(request);
+
+        boolean isValidAuthtoken = getDaoFactory().getAuthtokenDAO().validateAuthtoken(request.getAuthToken().getToken());
+        if (!isValidAuthtoken) {
+            return new StatusResponse("Authtoken has expired");
+        }
 
         try {
             long timestamp;
@@ -47,6 +58,11 @@ public class StatusService {
 
     public StatusResponse getStory(StatusRequest request) {
         validateGetPageRequest(request);
+
+        boolean isValidAuthtoken = getDaoFactory().getAuthtokenDAO().validateAuthtoken(request.getAuthToken().getToken());
+        if (!isValidAuthtoken) {
+            return new StatusResponse("Authtoken has expired");
+        }
 
         try {
             StoryDAO dao = getDaoFactory().getStoryDAO();
@@ -77,6 +93,71 @@ public class StatusService {
 
     // TODO: The big bad postStatus
     public PostStatusResponse postStatus(PostStatusRequest request) {
-        return new PostStatusResponse();
+        // TODO: What if status content is empty?
+        if(request.getStatus() == null) {
+            throw new RuntimeException("[Bad Request] Request needs to have an status");
+        }
+        else if(request.getAuthToken() == null) {
+            throw new RuntimeException("[Bad Request] Request needs to have an authtoken");
+        }
+
+        try { // TODO: should there be separate try/catch blocks for each dao call?
+            boolean isValidAuthtoken = getDaoFactory().getAuthtokenDAO().validateAuthtoken(request.getAuthToken().getToken());
+            if (!isValidAuthtoken) {
+                return new PostStatusResponse("Authtoken has expired"); // TODO: Am I handling this right?
+            }
+
+            getDaoFactory().getStoryDAO().addStatus(request.getStatus());
+
+            // TODO change the -1 thing in FollowsDAO.getPageOfFollowers
+            // TODO should messages have their own objects or am I fine to use what already exists
+            // FIXME: Creates a dependency on SQS, ideally would use abstract factory or something
+//            String messageBody = new Gson().toJson(request.getStatus());
+//            SQSAccessor.sendPostStatusMessage(messageBody);
+
+            Status status = request.getStatus();
+            User author = status.getUser();
+            String author_alias = author.getAlias();
+
+            FollowsDAO followsDAO = getDaoFactory().getFollowsDAO();
+            FeedDAO feedDAO = getDaoFactory().getFeedDAO();
+
+            List<UpdateFeedQueueItem> batch = new ArrayList<>();
+            String lastAlias = null;
+            boolean hasMorePages = true;
+            while(hasMorePages) {
+                Pair<List<User>, Boolean> result = followsDAO.getPageOfFollowers(author_alias, 25, lastAlias);
+                List<User> followers = result.getFirst();
+                hasMorePages = result.getSecond();
+                lastAlias = followers.get(followers.size() - 1).getAlias();
+
+                for (User follower : followers) {
+                    UpdateFeedQueueItem item = new UpdateFeedQueueItem(follower.getAlias(), author_alias, status.getTimestamp(), author.getFirstName(), author.getLastName(), status.getPost(), status.getUrls(), status.getMentions(), author.getImageUrl());
+                    batch.add(item);
+                }
+
+                if(batch.size() >= 25) { // TODO best number here?
+                    for(UpdateFeedQueueItem item : batch) {
+                        feedDAO.addFeed(item.getAlias(), item.getAuthor_alias(), item.getTimestamp(),
+                                item.getFirst_name(), item.getLast_name(), item.getContent(), item.getUrls(),
+                                item.getMentions(), item.getImage_url());
+                    }
+                    batch.clear();
+                }
+            }
+
+            if(batch.size() > 0) {
+                for(UpdateFeedQueueItem item : batch) {
+                    feedDAO.addFeed(item.getAlias(), item.getAuthor_alias(), item.getTimestamp(),
+                            item.getFirst_name(), item.getLast_name(), item.getContent(), item.getUrls(),
+                            item.getMentions(), item.getImage_url());
+                }
+            }
+
+            return new PostStatusResponse();
+        }
+        catch(Exception ex) {
+            throw new RuntimeException("[Server Error] Failed to post status: " + ex.getMessage());
+        }
     }
 }

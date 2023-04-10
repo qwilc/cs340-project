@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 
 import edu.byu.cs.tweeter.model.net.TweeterRemoteException;
+import edu.byu.cs.tweeter.model.net.response.Response;
 
 class ClientCommunicator {
 
@@ -47,7 +48,6 @@ class ClientCommunicator {
                 }
             }
         };
-
         return doRequest(urlPath, headers, returnType, requestStrategy);
     }
 
@@ -90,7 +90,8 @@ class ClientCommunicator {
             switch (connection.getResponseCode()) {
                 case HttpURLConnection.HTTP_OK:
                     String responseString = getResponse(connection.getInputStream());
-                    return JsonSerializer.deserialize(responseString, returnType);
+                    T result = JsonSerializer.deserialize(responseString, returnType);
+                    return result;
                 case HttpURLConnection.HTTP_BAD_REQUEST:
                     ErrorResponse errorResponse = getErrorResponse(connection);
                     throw new TweeterRequestException(errorResponse.errorMessage, errorResponse.errorType, errorResponse.stackTrace);

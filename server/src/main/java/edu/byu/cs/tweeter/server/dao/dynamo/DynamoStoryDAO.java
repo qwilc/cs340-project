@@ -8,7 +8,7 @@ import java.util.Map;
 import edu.byu.cs.tweeter.model.domain.Status;
 import edu.byu.cs.tweeter.model.domain.User;
 import edu.byu.cs.tweeter.server.dao.DataPage;
-import edu.byu.cs.tweeter.server.dao.StoryDAO;
+import edu.byu.cs.tweeter.server.dao.abstractDAO.StoryDAO;
 import edu.byu.cs.tweeter.server.dao.dto.StoryBean;
 import edu.byu.cs.tweeter.util.Pair;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient;
@@ -38,9 +38,11 @@ public class DynamoStoryDAO implements StoryDAO {
             .dynamoDbClient(dynamoDbClient)
             .build();
 
+    private final DynamoDbTable<StoryBean> table = enhancedClient.table(TableName, TableSchema.fromBean(StoryBean.class));
+
+
     @Override
     public Pair<List<Status>, Boolean> getPageOfStories(String targetUserAlias, int pageSize, Long lastTimestamp) {
-        DynamoDbTable<StoryBean> table = enhancedClient.table(TableName, TableSchema.fromBean(StoryBean.class));
         Key key = Key.builder()
                 .partitionValue(targetUserAlias)
                 .build();
@@ -81,8 +83,7 @@ public class DynamoStoryDAO implements StoryDAO {
 
     // TODO: Should we avoid depending on domain models?
     @Override
-    public void addStory(Status status) {
-        DynamoDbTable<StoryBean> table = enhancedClient.table(TableName, TableSchema.fromBean(StoryBean.class));
+    public void addStatus(Status status) {
         StoryBean storyBean = new StoryBean();
         User user = status.getUser();
 
@@ -99,8 +100,7 @@ public class DynamoStoryDAO implements StoryDAO {
     }
 
     @Override
-    public void deleteStory(String alias, Long timestamp) {
-        DynamoDbTable<StoryBean> table = enhancedClient.table(TableName, TableSchema.fromBean(StoryBean.class));
+    public void deleteStatus(String alias, Long timestamp) {
         Key key = Key.builder()
                 .partitionValue(alias).sortValue(timestamp)
                 .build();

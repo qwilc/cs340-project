@@ -37,9 +37,9 @@ public class DynamoFollowsDAOTest {
 
     @Test
     public void testSuccessfulAdd() {
-        dao.addFollow("@allen", "Allen", "Anderson", "@testfollowee", "Test", "Followee");
-        dao.addFollow("@follower", "Test", "Follower", "@allen", "Allen", "Anderson");
-        dao.addFollow("@testfollower", "Test", "Follower", "@testfollowee", "Test", "Followee");
+        dao.addFollow("@allen", "Allen", "Anderson", "@testfollowee", "Test", "Followee", "", "");
+        dao.addFollow("@follower", "Test", "Follower", "@allen", "Allen", "Anderson","", "");
+        dao.addFollow("@testfollower", "Test", "Follower", "@testfollowee", "Test", "Followee", "", "");
         FollowBean follow = dao.getFollow("@testfollower", "@testfollowee");
 
         assertNotNull(follow);

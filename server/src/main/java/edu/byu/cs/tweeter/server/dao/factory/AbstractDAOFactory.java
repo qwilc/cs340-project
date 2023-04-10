@@ -1,11 +1,11 @@
 package edu.byu.cs.tweeter.server.dao.factory;
 
-import edu.byu.cs.tweeter.server.dao.AuthtokenDAO;
-import edu.byu.cs.tweeter.server.dao.FeedDAO;
-import edu.byu.cs.tweeter.server.dao.StatusDAO;
-import edu.byu.cs.tweeter.server.dao.FollowsDAO;
-import edu.byu.cs.tweeter.server.dao.StoryDAO;
-import edu.byu.cs.tweeter.server.dao.UserDAO;
+import edu.byu.cs.tweeter.server.dao.abstractDAO.AuthtokenDAO;
+import edu.byu.cs.tweeter.server.dao.abstractDAO.FeedDAO;
+import edu.byu.cs.tweeter.server.dao.abstractDAO.ImageDAO;
+import edu.byu.cs.tweeter.server.dao.abstractDAO.FollowsDAO;
+import edu.byu.cs.tweeter.server.dao.abstractDAO.StoryDAO;
+import edu.byu.cs.tweeter.server.dao.abstractDAO.UserDAO;
 
 public interface AbstractDAOFactory {
     FollowsDAO getFollowsDAO();
@@ -13,4 +13,6 @@ public interface AbstractDAOFactory {
     FeedDAO getFeedDAO();
     AuthtokenDAO getAuthtokenDAO();
     UserDAO getUserDAO();
+
+    ImageDAO getImageDAO();
 }

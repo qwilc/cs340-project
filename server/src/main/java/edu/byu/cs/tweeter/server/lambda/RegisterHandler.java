@@ -11,6 +11,7 @@ import edu.byu.cs.tweeter.server.service.UserService;
 public class RegisterHandler implements RequestHandler<RegisterRequest, AuthenticationResponse>  {
     @Override
     public AuthenticationResponse handleRequest(RegisterRequest request, Context context) {
+        System.out.println("in registerHandler");
         UserService userService = new UserService(new DynamoDAOFactory());
         return userService.register(request);
     }

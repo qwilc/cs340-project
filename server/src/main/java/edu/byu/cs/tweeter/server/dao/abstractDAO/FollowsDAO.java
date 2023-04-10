@@ -1,4 +1,4 @@
-package edu.byu.cs.tweeter.server.dao;
+package edu.byu.cs.tweeter.server.dao.abstractDAO;
 
 import java.util.List;
 
@@ -11,12 +11,14 @@ public interface FollowsDAO { // TODO: minor, replace handle with alias
 
     Pair<List<User>, Boolean> getPageOfFollowers(String targetUserAlias, int pageSize, String lastUserAlias);
 
-    void addFollow(String follower_handle, String follower_firstname, String follower_lastname, String followee_handle, String followee_firstname, String followee_lastname);
+    void addFollow(String follower_handle, String follower_firstname, String follower_lastname, String followee_handle, String followee_firstname, String followee_lastname, String follower_image_url, String followee_image_url);
 
     void deleteFollow(String follower_handle, String followee_handle);
 
     FollowBean getFollow(String follower_handle, String followee_handle);
 
     Boolean isFollower(String follower_alias, String followee_alias);
+
+    public void addFollowersBatch(List<FollowBean> follows);
 
 }

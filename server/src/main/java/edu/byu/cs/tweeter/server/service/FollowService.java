@@ -12,8 +12,9 @@ import edu.byu.cs.tweeter.model.net.response.FollowsResponse;
 import edu.byu.cs.tweeter.model.net.response.GetCountResponse;
 import edu.byu.cs.tweeter.model.net.response.IsFollowerResponse;
 import edu.byu.cs.tweeter.model.net.response.UpdateFollowResponse;
-import edu.byu.cs.tweeter.server.dao.FollowsDAO;
-import edu.byu.cs.tweeter.server.dao.UserDAO;
+import edu.byu.cs.tweeter.server.dao.abstractDAO.AuthtokenDAO;
+import edu.byu.cs.tweeter.server.dao.abstractDAO.FollowsDAO;
+import edu.byu.cs.tweeter.server.dao.abstractDAO.UserDAO;
 import edu.byu.cs.tweeter.server.dao.dynamo.DynamoFollowsDAO;
 import edu.byu.cs.tweeter.server.dao.factory.AbstractDAOFactory;
 import edu.byu.cs.tweeter.util.Pair;
@@ -45,6 +46,11 @@ public class FollowService {
         }
 
         try {
+            boolean isValidAuthtoken = getDaoFactory().getAuthtokenDAO().validateAuthtoken(request.getAuthToken().getToken());
+            if (!isValidAuthtoken) {
+                return new FollowsResponse("Authtoken has expired");
+            }
+
             FollowsDAO dao = getDaoFactory().getFollowsDAO();
             Pair<List<User>, Boolean> result = dao.getPageOfFollowees(request.getFollowerAlias(), request.getLimit(), request.getLastFolloweeAlias());
             return new FollowsResponse(result.getFirst(), result.getSecond());
@@ -66,6 +72,11 @@ public class FollowService {
         }
 
         try {
+            boolean isValidAuthtoken = getDaoFactory().getAuthtokenDAO().validateAuthtoken(request.getAuthToken().getToken());
+            if (!isValidAuthtoken) {
+                return new FollowsResponse("Authtoken has expired");
+            }
+
             DynamoFollowsDAO dao = new DynamoFollowsDAO();
             // TODO: Fix the FollowsRequest attribute names
             Pair<List<User>, Boolean> result = getDaoFactory().getFollowsDAO().getPageOfFollowers(request.getFollowerAlias(), request.getLimit(), request.getLastFolloweeAlias());
@@ -80,20 +91,37 @@ public class FollowService {
         if(request.getFollowee() == null) {
             throw new RuntimeException("[Bad Request] Request needs to have a followee alias");
         }
+        if(request.getAuthToken() == null) {
+            throw new RuntimeException("[Bad Request] Request needs to have an authtoken");
+        }
+
         AuthToken authtoken = request.getAuthToken();
-        // TODO: set up authtoken validation
-        String alias = getDaoFactory().getAuthtokenDAO().getAlias(authtoken.getToken());
+        String token = authtoken.getToken();
+        boolean isValidAuthtoken = getDaoFactory().getAuthtokenDAO().validateAuthtoken(token);
+        if (!isValidAuthtoken) {
+            return new UpdateFollowResponse("Authtoken has expired");
+        }
+
+        AuthtokenDAO authtokenDAO = getDaoFactory().getAuthtokenDAO();
+        String alias = authtokenDAO.getAlias(token);
         User user = getDaoFactory().getUserDAO().getUser(alias);
 
         User followee = request.getFollowee();
 
         FollowsDAO followsDAO = getDaoFactory().getFollowsDAO();
+        UserDAO userDAO = getDaoFactory().getUserDAO();
 
         if(unfollow) {
             followsDAO.deleteFollow(user.getAlias(), followee.getAlias());
+            userDAO.decrementFollowerCount(followee.getAlias());
+            userDAO.decrementFolloweeCount(user.getAlias());
         }
         else {
-            followsDAO.addFollow(user.getAlias(), user.getFirstName(), user.getLastName(), followee.getAlias(), followee.getFirstName(), followee.getLastName());
+            followsDAO.addFollow(user.getAlias(), user.getFirstName(), user.getLastName(),
+                    followee.getAlias(), followee.getFirstName(), followee.getLastName(),
+                    user.getImageUrl(), followee.getImageUrl());
+            userDAO.incrementFollowerCount(followee.getAlias());
+            userDAO.incrementFolloweeCount(user.getAlias());
         }
 
         return new UpdateFollowResponse();
@@ -111,15 +139,34 @@ public class FollowService {
         if(request.getFollowee() == null) {
             throw new RuntimeException("[Bad Request] Request needs to have a followee alias");
         }
+        if(request.getAuthToken() == null) {
+            throw new RuntimeException("[Bad Request] Request needs to have an authtoken");
+        }
+
+        boolean isValidAuthtoken = getDaoFactory().getAuthtokenDAO().validateAuthtoken(request.getAuthToken().getToken());
+        if (!isValidAuthtoken) {
+            return new IsFollowerResponse("Authtoken has expired");
+        }
+
         FollowsDAO dao = getDaoFactory().getFollowsDAO();
+        System.out.println("follower: " + request.getFollower().getAlias() + " followee: " + request.getFollowee().getAlias());
         boolean isFollower = dao.isFollower(request.getFollower().getAlias(), request.getFollowee().getAlias());
-        return new IsFollowerResponse(isFollower);
+        System.out.println("IsFollower: " + isFollower);
+        IsFollowerResponse response = new IsFollowerResponse(isFollower);
+        System.out.println("IsFollower from response in Service: " + response.getIsFollower());
+        return response;
     }
 
     public GetCountResponse getFollowingCount(GetCountRequest request) {
         if(request.getTargetUser() == null) {
             throw new RuntimeException("[Bad Request] Request needs to have a target user");
         }
+
+        boolean isValidAuthtoken = getDaoFactory().getAuthtokenDAO().validateAuthtoken(request.getAuthToken().getToken());
+        if (!isValidAuthtoken) {
+            return new GetCountResponse("Authtoken has expired");
+        }
+
         UserDAO dao = getDaoFactory().getUserDAO();
         String alias = request.getTargetUser().getAlias();
         return new GetCountResponse(dao.getFollowingCount(alias));
@@ -130,6 +177,11 @@ public class FollowService {
             throw new RuntimeException("[Bad Request] Request needs to have a target user");
         }
         try {
+            boolean isValidAuthtoken = getDaoFactory().getAuthtokenDAO().validateAuthtoken(request.getAuthToken().getToken());
+            if (!isValidAuthtoken) {
+                return new GetCountResponse("Authtoken has expired");
+            }
+
             UserDAO dao = getDaoFactory().getUserDAO();
             String alias = request.getTargetUser().getAlias();
             return new GetCountResponse(dao.getFollowersCount(alias));

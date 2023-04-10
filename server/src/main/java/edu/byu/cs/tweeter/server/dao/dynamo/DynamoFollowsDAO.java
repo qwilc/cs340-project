@@ -2,23 +2,28 @@ package edu.byu.cs.tweeter.server.dao.dynamo;
 
 import edu.byu.cs.tweeter.model.domain.User;
 import edu.byu.cs.tweeter.server.dao.DataPage;
-import edu.byu.cs.tweeter.server.dao.FollowsDAO;
+import edu.byu.cs.tweeter.server.dao.abstractDAO.FollowsDAO;
 import edu.byu.cs.tweeter.server.dao.dto.FollowBean;
 import edu.byu.cs.tweeter.util.Pair;
 import software.amazon.awssdk.core.pagination.sync.SdkIterable;
 import software.amazon.awssdk.enhanced.dynamodb.*;
+import software.amazon.awssdk.enhanced.dynamodb.model.BatchWriteItemEnhancedRequest;
+import software.amazon.awssdk.enhanced.dynamodb.model.BatchWriteResult;
 import software.amazon.awssdk.enhanced.dynamodb.model.PageIterable;
 import software.amazon.awssdk.enhanced.dynamodb.model.Page;
 import software.amazon.awssdk.enhanced.dynamodb.model.QueryConditional;
 import software.amazon.awssdk.enhanced.dynamodb.model.QueryEnhancedRequest;
+import software.amazon.awssdk.enhanced.dynamodb.model.WriteBatch;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
+import software.amazon.awssdk.services.dynamodb.model.DynamoDbException;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 public class DynamoFollowsDAO implements FollowsDAO {
     private static final String TableName = "follows";
@@ -35,14 +40,16 @@ public class DynamoFollowsDAO implements FollowsDAO {
             .dynamoDbClient(dynamoDbClient)
             .build();
 
+    private final DynamoDbTable<FollowBean> table = enhancedClient.table(TableName, TableSchema.fromBean(FollowBean.class));
+
+
     private static boolean isNonEmptyString(String value) {
         return (value != null && value.length() > 0);
     }
 
     @Override
-    public void addFollow(String follower_handle, String follower_firstname, String follower_lastname, String followee_handle, String followee_firstname, String followee_lastname) {
-        DynamoDbTable<FollowBean> table = enhancedClient.table(TableName, TableSchema.fromBean(FollowBean.class));
-
+    public void addFollow(String follower_handle, String follower_firstname, String follower_lastname,
+                          String followee_handle, String followee_firstname, String followee_lastname, String follower_image_url, String followee_image_url) {
         FollowBean newFollow = new FollowBean();
         newFollow.setFollower_handle(follower_handle);
         newFollow.setFollower_firstname(follower_firstname);
@@ -53,57 +60,67 @@ public class DynamoFollowsDAO implements FollowsDAO {
         table.putItem(newFollow);
     }
 
+    // TODO: make private (only place using it elsewhere is a badly-done test)
     public FollowBean getFollow(String follower_handle, String followee_handle) {
-        DynamoDbTable<FollowBean> table = enhancedClient.table(TableName, TableSchema.fromBean(FollowBean.class));
-        Key key = Key.builder()
-                .partitionValue(follower_handle).sortValue(followee_handle)
-                .build();
+        System.out.println("In DynamoFollowsDAO.getFollow");
+        try {
+            System.out.println("follower: " + follower_handle + " followee: " + followee_handle);
+            System.out.flush();
 
-        // TODO: make private (only place using it elsewhere is my bad test)
-        return table.getItem(key);
+            Key key = Key.builder()
+                    .partitionValue(follower_handle).sortValue(followee_handle)
+                    .build();
+
+            System.out.println("key built");
+            System.out.flush();
+
+            return table.getItem(key);
+        }
+        catch(Exception ex) {
+            throw new RuntimeException("Failed to get follow: " + ex.getClass() + ": " + ex.getMessage());
+        }
     }
 
     @Override
     public Boolean isFollower(String follower_alias, String followee_alias) {
+        System.out.println("Running DynamoFollowsDAO.isFollower");
         FollowBean follow = getFollow(follower_alias, followee_alias);
-        // TODO: Does it return null?
-        return follow != null;
+        System.out.println("getFollow result returned");
+        return follow != null && Objects.equals(follow.getFollower_handle(), follower_alias);
     }
-
-    // TODO: delete; currently just keeping it to remind me how to update
-//    public void updateNames(String follower_handle, String follower_name, String followee_handle, String followee_name) {
-//        DynamoDbTable<FollowBean> table = enhancedClient.table(TableName, TableSchema.fromBean(FollowBean.class));
-//        Key key = Key.builder()
-//                .partitionValue(follower_handle).sortValue(followee_handle)
-//                .build();
-//
-//        FollowBean follow = table.getItem(key);
-//
-//        follow.setFollowee_firstname(followee_name);
-//        follow.setFollower_firstname(follower_name);
-//        table.updateItem(follow);
-//    }
 
     @Override
     public void deleteFollow(String follower_handle, String followee_handle) {
-        DynamoDbTable<FollowBean> table = enhancedClient.table(TableName, TableSchema.fromBean(FollowBean.class));
         Key key = Key.builder()
                 .partitionValue(follower_handle).sortValue(followee_handle)
                 .build();
         table.deleteItem(key);
     }
 
+    /**
+     * Gets the users from the database that are following the user specified in the request. Uses
+     * information in the request object to limit the number of followees returned and to return the
+     * next set of followees after any that were returned in a previous request.
+     *
+     * @param targetUserAlias the target followee
+     * @param pageSize the number of table items to evaluate
+     *                 a negative pageSize indicates no limit should be used
+     * @return a pair containing a list of followees and a boolean indicating whether there are more pages
+     */
     @Override
     public Pair<List<User>, Boolean> getPageOfFollowers(String targetUserAlias, int pageSize, String lastUserAlias ) {
-        DynamoDbIndex<FollowBean> index = enhancedClient.table(TableName, TableSchema.fromBean(FollowBean.class)).index(IndexName);
+        DynamoDbIndex<FollowBean> index = table.index(IndexName);
         Key key = Key.builder()
                 .partitionValue(targetUserAlias)
                 .build();
 
         QueryEnhancedRequest.Builder requestBuilder = QueryEnhancedRequest.builder()
                 .queryConditional(QueryConditional.keyEqualTo(key))
-                .scanIndexForward(true)
-                .limit(pageSize);
+                .scanIndexForward(true);
+
+        if(pageSize > 0) {
+            requestBuilder.limit(pageSize); // TODO: apparently this is how many to evaluate, not how many to return
+        }
 
         if(isNonEmptyString(lastUserAlias)) {
             Map<String, AttributeValue> startKey = new HashMap<>();
@@ -136,7 +153,6 @@ public class DynamoFollowsDAO implements FollowsDAO {
 
     @Override
     public Pair<List<User>, Boolean> getPageOfFollowees(String targetUserAlias, int pageSize, String lastUserAlias ) {
-        DynamoDbTable<FollowBean> table = enhancedClient.table(TableName, TableSchema.fromBean(FollowBean.class));
         Key key = Key.builder()
                 .partitionValue(targetUserAlias)
                 .build();
@@ -172,5 +188,50 @@ public class DynamoFollowsDAO implements FollowsDAO {
             users.add(follow.getFolloweeAsUser());
         }
         return new Pair<>(users, result.hasMorePages());
+    }
+
+    @Override
+    public void addFollowersBatch(List<FollowBean> follows) {
+        List<FollowBean> batchToWrite = new ArrayList<>();
+        for (FollowBean f : follows) {
+            batchToWrite.add(f);
+
+            if (batchToWrite.size() == 25) {
+                // package this batch up and send to DynamoDB.
+                writeChunkOfFollowBeans(batchToWrite);
+                batchToWrite = new ArrayList<>();
+            }
+        }
+
+        // write any remaining
+        if (batchToWrite.size() > 0) {
+            // package this batch up and send to DynamoDB.
+            writeChunkOfFollowBeans(batchToWrite);
+        }
+    }
+    private void writeChunkOfFollowBeans(List<FollowBean> userDTOs) {
+        if(userDTOs.size() > 25)
+            throw new RuntimeException("Too many follows to write");
+
+        DynamoDbTable<FollowBean> table = enhancedClient.table(TableName, TableSchema.fromBean(FollowBean.class));
+        WriteBatch.Builder<FollowBean> writeBuilder = WriteBatch.builder(FollowBean.class).mappedTableResource(table);
+        for (FollowBean item : userDTOs) {
+            writeBuilder.addPutItem(builder -> builder.item(item));
+        }
+        BatchWriteItemEnhancedRequest batchWriteItemEnhancedRequest = BatchWriteItemEnhancedRequest.builder()
+                .writeBatches(writeBuilder.build()).build();
+
+        try {
+            BatchWriteResult result = enhancedClient.batchWriteItem(batchWriteItemEnhancedRequest);
+
+            // just hammer dynamodb again with anything that didn't get written this time
+            if (result.unprocessedPutItemsForTable(table).size() > 0) {
+                writeChunkOfFollowBeans(result.unprocessedPutItemsForTable(table));
+            }
+
+        } catch (DynamoDbException e) {
+            System.err.println(e.getMessage());
+            System.exit(1);
+        }
     }
 }

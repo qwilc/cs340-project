@@ -40,7 +40,6 @@ public class SQSAccessor {
 
             SendMessageResult send_msg_result = getClient().sendMessage(send_msg_request);
 
-            // TODO What else do I need to do with message result?
             String msgId = send_msg_result.getMessageId();
             System.out.println("Message ID: " + msgId);
 

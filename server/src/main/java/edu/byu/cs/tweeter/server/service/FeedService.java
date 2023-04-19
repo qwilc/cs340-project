@@ -40,35 +40,30 @@ public class FeedService {
         String lastAlias = null;
         boolean hasMorePages = true;
 
-//        try {
-            while (hasMorePages) {
-                Pair<List<User>, Boolean> result = followsDAO.getPageOfFollowers(author_alias, 200, lastAlias);
-                List<User> followers = result.getFirst();
-                hasMorePages = result.getSecond();
-                if(followers.size() > 0) {
-                    lastAlias = followers.get(followers.size() - 1).getAlias();
+        while (hasMorePages) {
+            Pair<List<User>, Boolean> result = followsDAO.getPageOfFollowers(author_alias, 200, lastAlias);
+            List<User> followers = result.getFirst();
+            hasMorePages = result.getSecond();
+            if(followers.size() > 0) {
+                lastAlias = followers.get(followers.size() - 1).getAlias();
 
-                    for (User follower : followers) {
-                        UpdateFeedQueueItem item = new UpdateFeedQueueItem(follower.getAlias(), author_alias, status.getTimestamp(), author.getFirstName(), author.getLastName(), status.getPost(), status.getUrls(), status.getMentions(), author.getImageUrl());
-                        batch.add(item);
-                    }
+                for (User follower : followers) {
+                    UpdateFeedQueueItem item = new UpdateFeedQueueItem(follower.getAlias(), author_alias, status.getTimestamp(), author.getFirstName(), author.getLastName(), status.getPost(), status.getUrls(), status.getMentions(), author.getImageUrl());
+                    batch.add(item);
+                }
 
-                    if (batch.size() >= 100) { // TODO best number here?
-                        String msg = new Gson().toJson(batch);
-                        SQSAccessor.sendUpdateFeedMessage(msg);
-                        batch.clear(); // TODO clear or set to new list?
-                    }
+                if (batch.size() >= 100) { // TODO best number here?
+                    String msg = new Gson().toJson(batch);
+                    SQSAccessor.sendUpdateFeedMessage(msg);
+                    batch.clear(); // TODO clear or set to new list?
                 }
             }
+        }
 
-            if (batch.size() > 0) {
-                String msg = new Gson().toJson(batch);
-                SQSAccessor.sendUpdateFeedMessage(msg);
-            }
-//        }
-//        catch(Exception ex) {
-//            throw new RuntimeException("[Server Error] Failed to get followers and send to queue");
-//        }
+        if (batch.size() > 0) {
+            String msg = new Gson().toJson(batch);
+            SQSAccessor.sendUpdateFeedMessage(msg);
+        }
     }
 
     public void updateFeeds(String messageBody) {

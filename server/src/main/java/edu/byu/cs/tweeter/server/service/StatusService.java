@@ -22,7 +22,7 @@ import edu.byu.cs.tweeter.server.sqs.UpdateFeedQueueItem;
 import edu.byu.cs.tweeter.util.Pair;
 
 public class StatusService {
-    private AbstractDAOFactory daoFactory;
+    private final AbstractDAOFactory daoFactory;
 
     public StatusService(AbstractDAOFactory daoFactory) {
         this.daoFactory = daoFactory;
@@ -92,9 +92,7 @@ public class StatusService {
         }
     }
 
-    // TODO: The big bad postStatus
     public PostStatusResponse postStatus(PostStatusRequest request) {
-        // TODO: What if status content is empty?
         if(request.getStatus() == null) {
             throw new RuntimeException("[Bad Request] Request needs to have an status");
         }
@@ -105,13 +103,11 @@ public class StatusService {
         try { // TODO: should there be separate try/catch blocks for each dao call?
             boolean isValidAuthtoken = getDaoFactory().getAuthtokenDAO().validateAuthtoken(request.getAuthToken().getToken());
             if (!isValidAuthtoken) {
-                return new PostStatusResponse("Authtoken has expired"); // TODO: Am I handling this right?
+                return new PostStatusResponse("Authtoken has expired");
             }
 
             getDaoFactory().getStoryDAO().addStatus(request.getStatus());
 
-            // TODO change the -1 thing in FollowsDAO.getPageOfFollowers
-            // TODO should messages have their own objects or am I fine to use what already exists
             // FIXME: Creates a dependency on SQS, ideally would use abstract factory or something
             String messageBody = JsonSerializer.serialize(request.getStatus());
             SQSAccessor.sendPostStatusMessage(messageBody);

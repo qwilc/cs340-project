@@ -14,7 +14,7 @@ public class PostUpdateFeedMessagesHandler implements RequestHandler<SQSEvent, V
         FeedService service = new FeedService(new DynamoDAOFactory());
         for (SQSEvent.SQSMessage msg : event.getRecords()) {
             service.postUpdateMessages(msg.getBody());
-            SQSAccessor.deletePostStatusMessage(msg); // TODO: maybe this should be in services
+            SQSAccessor.deletePostStatusMessage(msg);
         }
         return null;
     }

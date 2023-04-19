@@ -187,7 +187,6 @@ public class FollowService {
             return new GetCountResponse(dao.getFollowersCount(alias));
         }
         catch(Exception ex) {
-            // TODO: do we throw exception or return failed response or both?
             throw new RuntimeException("[Server Error] Failed to get follower count " + ex.getMessage());
         }
     }

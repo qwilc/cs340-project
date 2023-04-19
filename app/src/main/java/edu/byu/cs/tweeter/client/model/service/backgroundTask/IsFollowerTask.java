@@ -46,7 +46,7 @@ public class IsFollowerTask extends AuthenticatedTask {
 
     @Override
     protected Request createRequest() {
-        return new IsFollowerRequest(getAuthToken(), follower, followee); // TODO: Make sure those aren't flipped anywhere
+        return new IsFollowerRequest(getAuthToken(), follower, followee);
     }
 
     @Override

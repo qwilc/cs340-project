@@ -13,7 +13,6 @@ import edu.byu.cs.tweeter.model.domain.User;
 import edu.byu.cs.tweeter.model.net.request.FollowsRequest;
 import edu.byu.cs.tweeter.model.net.response.FollowsResponse;
 import edu.byu.cs.tweeter.server.dao.dynamo.DynamoFollowsDAO;
-import edu.byu.cs.tweeter.server.dao.ExampleFollowDAO;
 import edu.byu.cs.tweeter.server.dao.factory.DynamoDAOFactory;
 import edu.byu.cs.tweeter.util.Pair;
 
@@ -42,7 +41,7 @@ public class FollowServiceTest {
         // Setup a request object to use in the tests
         request = new FollowsRequest(authToken, currentUser.getAlias(), 3, null);
 
-        // Setup a mock ExampleFollowDAO that will return known responses
+        // Setup a mock DynamoFollowsDAO that will return known responses
         expectedResponse = new Pair(Arrays.asList(resultUser1, resultUser2, resultUser3), false);
         mockFollowDAO = Mockito.mock(DynamoFollowsDAO.class);
         mockDynamoDAOFactory = Mockito.mock(DynamoDAOFactory.class);
@@ -56,7 +55,7 @@ public class FollowServiceTest {
 
     /**
      * Verify that the {@link FollowService#getFollowees(FollowsRequest)}
-     * method returns the same result as the {@link ExampleFollowDAO} class.
+     * method returns the same result as the {@link DynamoFollowsDAO} class.
      */
     @Test
     public void testGetFollowees_validRequest_correctResponse() {

@@ -4,14 +4,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
@@ -19,6 +17,7 @@ import edu.byu.cs.tweeter.client.cache.Cache;
 import edu.byu.cs.tweeter.client.model.net.ServerFacade;
 import edu.byu.cs.tweeter.client.model.service.StatusService;
 import edu.byu.cs.tweeter.client.model.service.UserService;
+import edu.byu.cs.tweeter.model.domain.AuthToken;
 import edu.byu.cs.tweeter.model.domain.Status;
 import edu.byu.cs.tweeter.model.domain.User;
 import edu.byu.cs.tweeter.model.net.TweeterRemoteException;
@@ -44,10 +43,13 @@ public class PostStatusTest {
         resetCountDownLatch();
         ServerFacade serverFacade = new ServerFacade();
 
+        // Login user and store data in Cache
         AuthenticationRequest authenticationRequest = new AuthenticationRequest("@q", "q");
         AuthenticationResponse authenticationResponse = serverFacade.authenticate(authenticationRequest, UserService.LOGIN_PATH);
-        Cache.getInstance().setCurrUser(authenticationResponse.getUser());
-        Cache.getInstance().setCurrUserAuthToken(authenticationResponse.getAuthToken());
+        User user = authenticationResponse.getUser();
+        AuthToken authToken = authenticationResponse.getAuthToken();
+        Cache.getInstance().setCurrUser(user);
+        Cache.getInstance().setCurrUserAuthToken(authToken);
 
         MainPresenter.MainView mockView = Mockito.mock(MainPresenter.MainView.class);
         Mockito.doAnswer(new Answer() {
@@ -56,11 +58,10 @@ public class PostStatusTest {
                 countDownLatch.countDown();
                 return null;
             }
-        }).when(mockView).displayMessage(Mockito.anyString());
+        }).when(mockView).displayMessage("Successfully Posted!");
 
         MainPresenter spyPresenter = Mockito.spy(new MainPresenter(mockView));
 
-        User user = Cache.getInstance().getCurrUser();
         String post = "Hello @q";
         Long currentTime = System.currentTimeMillis();
         List<String> urls = spyPresenter.parseURLs(post);
@@ -70,12 +71,12 @@ public class PostStatusTest {
         Mockito.doReturn(currentTime).when(spyPresenter).getTime();
 
         spyPresenter.postStatus(post, null);
-
         awaitCountDownLatch();
+        Mockito.verify(mockView).displayMessage("Successfully Posted!");
 
         StatusRequest request = new StatusRequest(Cache.getInstance().getCurrUserAuthToken(), user.getAlias(), 50, null);
-
         StatusResponse response = serverFacade.getStory(request, StatusService.GET_STORY_PATH);
+
         assertTrue(response.isSuccess());
 
         List<Status> statuses = response.getStatuses();

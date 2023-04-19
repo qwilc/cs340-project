@@ -159,7 +159,7 @@ public class DynamoFollowsDAO implements FollowsDAO {
 
         QueryEnhancedRequest.Builder requestBuilder = QueryEnhancedRequest.builder()
                 .queryConditional(QueryConditional.keyEqualTo(key))
-                .scanIndexForward(true) // TODO: make sure both story and feed are in time order
+                .scanIndexForward(true)
                 .limit(pageSize);
 
         if(isNonEmptyString(lastUserAlias)) {

@@ -14,6 +14,8 @@ arr=(
         "postStatus"
         "follow"
         "unfollow"
+        "postUpdateFeedMessages"
+        "updateFeeds"
     )
 for FUNCTION_NAME in "${arr[@]}"
 do

@@ -49,7 +49,7 @@ public class DynamoStoryDAO implements StoryDAO {
 
         QueryEnhancedRequest.Builder requestBuilder = QueryEnhancedRequest.builder()
                 .queryConditional(QueryConditional.keyEqualTo(key))
-                .scanIndexForward(true)
+                .scanIndexForward(false)
                 .limit(pageSize);
 
         if(lastTimestamp != -1) {

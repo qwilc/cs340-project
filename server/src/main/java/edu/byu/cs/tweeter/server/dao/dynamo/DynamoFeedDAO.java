@@ -10,18 +10,23 @@ import edu.byu.cs.tweeter.model.domain.User;
 import edu.byu.cs.tweeter.server.dao.DataPage;
 import edu.byu.cs.tweeter.server.dao.abstractDAO.FeedDAO;
 import edu.byu.cs.tweeter.server.dao.dto.FeedBean;
+import edu.byu.cs.tweeter.server.sqs.UpdateFeedQueueItem;
 import edu.byu.cs.tweeter.util.Pair;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
 import software.amazon.awssdk.enhanced.dynamodb.Key;
 import software.amazon.awssdk.enhanced.dynamodb.TableSchema;
+import software.amazon.awssdk.enhanced.dynamodb.model.BatchWriteItemEnhancedRequest;
+import software.amazon.awssdk.enhanced.dynamodb.model.BatchWriteResult;
 import software.amazon.awssdk.enhanced.dynamodb.model.Page;
 import software.amazon.awssdk.enhanced.dynamodb.model.PageIterable;
 import software.amazon.awssdk.enhanced.dynamodb.model.QueryConditional;
 import software.amazon.awssdk.enhanced.dynamodb.model.QueryEnhancedRequest;
+import software.amazon.awssdk.enhanced.dynamodb.model.WriteBatch;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
+import software.amazon.awssdk.services.dynamodb.model.DynamoDbException;
 
 public class DynamoFeedDAO implements FeedDAO {
     private static final String TableName = "feed";
@@ -30,11 +35,11 @@ public class DynamoFeedDAO implements FeedDAO {
     private static final String AliasAttr = "alias";
     private static final String TimestampAttr = "timestamp";
 
-    private static DynamoDbClient dynamoDbClient = DynamoDbClient.builder()
+    private static final DynamoDbClient dynamoDbClient = DynamoDbClient.builder()
             .region(Region.US_EAST_2)
             .build();
 
-    private static DynamoDbEnhancedClient enhancedClient = DynamoDbEnhancedClient.builder()
+    private static final DynamoDbEnhancedClient enhancedClient = DynamoDbEnhancedClient.builder()
             .dynamoDbClient(dynamoDbClient)
             .build();
 
@@ -49,7 +54,7 @@ public class DynamoFeedDAO implements FeedDAO {
 
         QueryEnhancedRequest.Builder requestBuilder = QueryEnhancedRequest.builder()
                 .queryConditional(QueryConditional.keyEqualTo(key))
-                .scanIndexForward(true)
+                .scanIndexForward(false)
                 .limit(pageSize);
 
         if(lastTimestamp != -1) {
@@ -115,16 +120,73 @@ public class DynamoFeedDAO implements FeedDAO {
         table.putItem(feedBean);
     }
 
-    public void addFeed(FeedBean feedBean) {
-        table.putItem(feedBean);
-    }
-
     @Override
     public void deleteFeed(String alias, Long timestamp) {
         Key key = Key.builder()
                 .partitionValue(alias).sortValue(timestamp)
                 .build();
         table.deleteItem(key);
+    }
+
+    @Override
+    public void addFeedBatch(List<UpdateFeedQueueItem> feeds) {
+        List<FeedBean> batchToWrite = new ArrayList<>();
+        for (UpdateFeedQueueItem item : feeds) {
+
+            FeedBean feed = convertQueueItemToBean(item);
+            batchToWrite.add(feed);
+
+            if (batchToWrite.size() == 25) {
+                // package this batch up and send to DynamoDB.
+                writeChunkOfFeedBeans(batchToWrite);
+                batchToWrite = new ArrayList<>();
+            }
+        }
+
+        // write any remaining
+        if (batchToWrite.size() > 0) {
+            // package this batch up and send to DynamoDB.
+            writeChunkOfFeedBeans(batchToWrite);
+        }
+    }
+
+    private FeedBean convertQueueItemToBean(UpdateFeedQueueItem item) {
+        FeedBean feedBean = new FeedBean();
+        feedBean.setAlias(item.getAlias());
+        feedBean.setContent(item.getContent());
+        feedBean.setAuthor_alias(item.getAuthor_alias());
+        feedBean.setFirst_name(item.getFirst_name());
+        feedBean.setLast_name(item.getLast_name());
+        feedBean.setUrls(item.getUrls());
+        feedBean.setMentions(item.getMentions());
+        feedBean.setTimestamp(item.getTimestamp());
+        return feedBean;
+    }
+
+    private void writeChunkOfFeedBeans(List<FeedBean> feedDTOs) {
+        if(feedDTOs.size() > 25)
+            throw new RuntimeException("Too many feeds to write");
+
+        DynamoDbTable<FeedBean> table = enhancedClient.table(TableName, TableSchema.fromBean(FeedBean.class));
+        WriteBatch.Builder<FeedBean> writeBuilder = WriteBatch.builder(FeedBean.class).mappedTableResource(table);
+        for (FeedBean item : feedDTOs) {
+            writeBuilder.addPutItem(builder -> builder.item(item));
+        }
+        BatchWriteItemEnhancedRequest batchWriteItemEnhancedRequest = BatchWriteItemEnhancedRequest.builder()
+                .writeBatches(writeBuilder.build()).build();
+
+        try {
+            BatchWriteResult result = enhancedClient.batchWriteItem(batchWriteItemEnhancedRequest);
+
+            // just hammer dynamodb again with anything that didn't get written this time
+            if (result.unprocessedPutItemsForTable(table).size() > 0) {
+                writeChunkOfFeedBeans(result.unprocessedPutItemsForTable(table));
+            }
+
+        } catch (DynamoDbException e) {
+            System.out.println(e.getMessage());
+            System.exit(1);
+        }
     }
 
     private Status convertFeedBeanToStatus(FeedBean bean) {

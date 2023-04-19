@@ -9,8 +9,10 @@ import java.util.List;
 
 import edu.byu.cs.tweeter.model.domain.Status;
 import edu.byu.cs.tweeter.model.domain.User;
+import edu.byu.cs.tweeter.model.net.JsonSerializer;
 import edu.byu.cs.tweeter.server.dao.abstractDAO.FeedDAO;
 import edu.byu.cs.tweeter.server.dao.abstractDAO.FollowsDAO;
+import edu.byu.cs.tweeter.server.dao.dto.FeedBean;
 import edu.byu.cs.tweeter.server.dao.factory.AbstractDAOFactory;
 import edu.byu.cs.tweeter.server.sqs.SQSAccessor;
 import edu.byu.cs.tweeter.server.sqs.UpdateFeedQueueItem;
@@ -28,7 +30,7 @@ public class FeedService {
     }
 
     public void postUpdateMessages(String messageBody) {
-        Status status = new Gson().fromJson(messageBody, Status.class);
+        Status status = JsonSerializer.deserialize(messageBody, Status.class);
         User author = status.getUser();
         String author_alias = author.getAlias();
 
@@ -37,38 +39,48 @@ public class FeedService {
         List<UpdateFeedQueueItem> batch = new ArrayList<>();
         String lastAlias = null;
         boolean hasMorePages = true;
-        while(hasMorePages) {
-            Pair<List<User>, Boolean> result = followsDAO.getPageOfFollowers(author_alias, 25, lastAlias);
-            List<User> followers = result.getFirst();
-            hasMorePages = result.getSecond();
-            lastAlias = followers.get(followers.size() - 1).getAlias();
 
-            for (User follower : followers) {
-                UpdateFeedQueueItem item = new UpdateFeedQueueItem(follower.getAlias(), author_alias, status.getTimestamp(), author.getFirstName(), author.getLastName(), status.getPost(), status.getUrls(), status.getMentions(), author.getImageUrl());
-                batch.add(item);
+//        try {
+            while (hasMorePages) {
+                Pair<List<User>, Boolean> result = followsDAO.getPageOfFollowers(author_alias, 200, lastAlias);
+                List<User> followers = result.getFirst();
+                hasMorePages = result.getSecond();
+                if(followers.size() > 0) {
+                    lastAlias = followers.get(followers.size() - 1).getAlias();
+
+                    for (User follower : followers) {
+                        UpdateFeedQueueItem item = new UpdateFeedQueueItem(follower.getAlias(), author_alias, status.getTimestamp(), author.getFirstName(), author.getLastName(), status.getPost(), status.getUrls(), status.getMentions(), author.getImageUrl());
+                        batch.add(item);
+                    }
+
+                    if (batch.size() >= 100) { // TODO best number here?
+                        String msg = new Gson().toJson(batch);
+                        SQSAccessor.sendUpdateFeedMessage(msg);
+                        batch.clear(); // TODO clear or set to new list?
+                    }
+                }
             }
 
-            if(batch.size() >= 25) { // TODO best number here?
+            if (batch.size() > 0) {
                 String msg = new Gson().toJson(batch);
                 SQSAccessor.sendUpdateFeedMessage(msg);
-                batch.clear(); // TODO clear or set to new list?
             }
-        }
-
-        if(batch.size() > 0) {
-            String msg = new Gson().toJson(batch);
-            SQSAccessor.sendUpdateFeedMessage(msg);
-        }
+//        }
+//        catch(Exception ex) {
+//            throw new RuntimeException("[Server Error] Failed to get followers and send to queue");
+//        }
     }
 
     public void updateFeeds(String messageBody) {
+        System.out.println("In FeedService.updateFeeds");
         Type listType = new TypeToken<ArrayList<UpdateFeedQueueItem>>(){}.getType();
         List<UpdateFeedQueueItem> items = new Gson().fromJson(messageBody, listType);
         FeedDAO feedDAO = getDaoFactory().getFeedDAO();
-        for(UpdateFeedQueueItem item : items) {
-            feedDAO.addFeed(item.getAlias(), item.getAuthor_alias(), item.getTimestamp(),
-                    item.getFirst_name(), item.getLast_name(), item.getContent(), item.getUrls(),
-                    item.getMentions(), item.getImage_url());
+        try {
+            feedDAO.addFeedBatch(items);
+        }
+        catch(Exception ex) {
+            throw new RuntimeException("[Server Error] Error updating follower feeds");
         }
     }
 }

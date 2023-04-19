@@ -7,6 +7,7 @@ import java.util.List;
 
 import edu.byu.cs.tweeter.model.domain.Status;
 import edu.byu.cs.tweeter.model.domain.User;
+import edu.byu.cs.tweeter.model.net.JsonSerializer;
 import edu.byu.cs.tweeter.model.net.request.PostStatusRequest;
 import edu.byu.cs.tweeter.model.net.request.StatusRequest;
 import edu.byu.cs.tweeter.model.net.response.PostStatusResponse;
@@ -112,47 +113,8 @@ public class StatusService {
             // TODO change the -1 thing in FollowsDAO.getPageOfFollowers
             // TODO should messages have their own objects or am I fine to use what already exists
             // FIXME: Creates a dependency on SQS, ideally would use abstract factory or something
-//            String messageBody = new Gson().toJson(request.getStatus());
-//            SQSAccessor.sendPostStatusMessage(messageBody);
-
-            Status status = request.getStatus();
-            User author = status.getUser();
-            String author_alias = author.getAlias();
-
-            FollowsDAO followsDAO = getDaoFactory().getFollowsDAO();
-            FeedDAO feedDAO = getDaoFactory().getFeedDAO();
-
-            List<UpdateFeedQueueItem> batch = new ArrayList<>();
-            String lastAlias = null;
-            boolean hasMorePages = true;
-            while(hasMorePages) {
-                Pair<List<User>, Boolean> result = followsDAO.getPageOfFollowers(author_alias, 25, lastAlias);
-                List<User> followers = result.getFirst();
-                hasMorePages = result.getSecond();
-                lastAlias = followers.get(followers.size() - 1).getAlias();
-
-                for (User follower : followers) {
-                    UpdateFeedQueueItem item = new UpdateFeedQueueItem(follower.getAlias(), author_alias, status.getTimestamp(), author.getFirstName(), author.getLastName(), status.getPost(), status.getUrls(), status.getMentions(), author.getImageUrl());
-                    batch.add(item);
-                }
-
-                if(batch.size() >= 25) { // TODO best number here?
-                    for(UpdateFeedQueueItem item : batch) {
-                        feedDAO.addFeed(item.getAlias(), item.getAuthor_alias(), item.getTimestamp(),
-                                item.getFirst_name(), item.getLast_name(), item.getContent(), item.getUrls(),
-                                item.getMentions(), item.getImage_url());
-                    }
-                    batch.clear();
-                }
-            }
-
-            if(batch.size() > 0) {
-                for(UpdateFeedQueueItem item : batch) {
-                    feedDAO.addFeed(item.getAlias(), item.getAuthor_alias(), item.getTimestamp(),
-                            item.getFirst_name(), item.getLast_name(), item.getContent(), item.getUrls(),
-                            item.getMentions(), item.getImage_url());
-                }
-            }
+            String messageBody = JsonSerializer.serialize(request.getStatus());
+            SQSAccessor.sendPostStatusMessage(messageBody);
 
             return new PostStatusResponse();
         }

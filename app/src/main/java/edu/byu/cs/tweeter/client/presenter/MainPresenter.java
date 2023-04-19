@@ -91,8 +91,12 @@ public class MainPresenter extends Presenter {
 
     public void postStatus(String post, String tag) {
         ((MainView)getView()).setPostingMessage(true);
-        Status newStatus = new Status(post, Cache.getInstance().getCurrUser(), System.currentTimeMillis(), parseURLs(post), parseMentions(post));
+        Status newStatus = new Status(post, Cache.getInstance().getCurrUser(), getTime(), parseURLs(post), parseMentions(post));
         getStatusService().postStatus(newStatus, new PostStatusObserver());
+    }
+
+    Long getTime() {
+        return System.currentTimeMillis();
     }
 
     public class IsFollowerObserver extends Observer implements edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.IsFollowerObserver {
